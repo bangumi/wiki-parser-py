@@ -1,0 +1,24 @@
+version: 3
+
+tasks:
+  docs:
+    cmd: sphinx-autobuild docs/ docs/_build/ --watch rtorrent_rpc --port 8920
+
+  minor:
+    cmds:
+      - pyproject-bump minor
+      - task: bump
+
+  patch:
+    cmds:
+      - pyproject-bump micro
+      - task: bump
+
+  bump:
+    vars:
+      VERSION:
+        sh: yq '.project.version' pyproject.toml
+    cmds:
+      - git add pyproject.toml
+      - 'git commit -m "bump: {{.VERSION}}"'
+      - 'git tag "v{{.VERSION}}" -m "v{{.VERSION}}"'

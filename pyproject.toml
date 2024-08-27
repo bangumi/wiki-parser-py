@@ -1,0 +1,91 @@
+[build-system]
+requires = ["flit-core~=3.9"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "bgm-tv-wiki"
+version = "0.0.0"
+description = "bgm.tv wiki syntax parser"
+authors = [
+    { name = "trim21", email = "trim21me@gmail.com" },
+]
+readme = 'readme.md'
+license = { text = 'MIT' }
+keywords = ['rtorrent', 'rpc']
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3 :: Only',
+]
+
+requires-python = "~=3.10"
+
+dependencies = [
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.2",
+    "pytest-github-actions-annotate-failures==0.2.0",
+    "coverage==7.6.1",
+    'pre-commit==3.8.0; python_version >= "3.9"',
+    'mypy==1.11.1; python_version >= "3.9"',
+    'pyyaml>=6,<7',
+    'types-PyYAML'
+]
+
+[project.urls]
+#Homepage = "https://github.com/trim21/rtorrent-rpc"
+
+[tool.pytest.ini_options]
+addopts = '-rav -Werror'
+
+[tool.mypy]
+python_version = "3.10"
+disallow_untyped_defs = true
+ignore_missing_imports = true
+warn_return_any = false
+warn_unused_configs = true
+show_error_codes = true
+
+platform = 'unix'
+
+[tool.black]
+target-version = ['py310']
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+ignore = [
+    'PLW2901',
+    'PLR0911',
+    'INP001',
+    'N806',
+    'N802',
+    'N803',
+    'E501',
+    'BLE001',
+    'RUF002',
+    'S324',
+    'S301',
+    'S314',
+    'S101',
+    'N815',
+    'S104',
+    'C901',
+    'PLR0913',
+    'RUF001',
+    'SIM108',
+    'TCH003',
+    'RUF003',
+    'RET504',
+    'TRY300',
+    'TRY003',
+    'TRY201',
+    'TRY301',
+    'PLR0912',
+    'PLR0915',
+    'PLR2004',
+    'PGH003',
+]
