@@ -11,7 +11,6 @@ authors = [
 ]
 readme = 'readme.md'
 license = { text = 'MIT' }
-keywords = ['rtorrent', 'rpc']
 classifiers = [
     'Development Status :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
