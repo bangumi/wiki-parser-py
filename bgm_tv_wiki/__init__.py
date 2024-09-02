@@ -61,7 +61,7 @@ class Wiki:
                     fields.append(Field(key=f.key, value=v))
                 continue
 
-        return Wiki(type=self.type, fields=tuple(fields))
+        return Wiki(type=self.type, fields=tuple(fields), _eol=self._eol)
 
     def get(self, key: str) -> str | list[Item] | None:
         for f in self.fields:
@@ -100,11 +100,11 @@ class Wiki:
         if not found:
             fields.append(field)
 
-        return Wiki(type=self.type, fields=tuple(fields))
+        return Wiki(type=self.type, fields=tuple(fields), _eol=self._eol)
 
     def remove(self, key: str) -> Wiki:
         fields = tuple(f for f in self.fields if f.key != key)
-        return Wiki(type=self.type, fields=fields)
+        return Wiki(type=self.type, fields=fields, _eol=self._eol)
 
     def semantics_equal(self, other: Wiki) -> bool:
         if self.type != other.type:
@@ -197,11 +197,11 @@ suffix = "}}"
 
 def parse(s: str) -> Wiki:
     crlf = s.count("\r\n")
-    lf = s.count("\n")
-    if crlf == 0 or lf == 0 or lf > crlf:
-        eol = "\n"
-    else:
+    lf = s.count("\n") - crlf
+    if crlf >= lf:
         eol = "\r\n"
+    else:
+        eol = "\n"
 
     s = s.replace("\r\n", "\n")
     s, line_offset = _process_input(s)
@@ -371,11 +371,12 @@ def __render(w: Wiki) -> Generator[str, None, None]:
         if isinstance(field.value, str):
             yield f"|{field.key}= {field.value}"
         elif isinstance(field.value, list):
-            yield f"|{field.key}= {{"
+            yield f"|{field.key}={{"
             yield from __render_items(field.value)
             yield "}"
         elif field.value is None:
-            yield f"|{field.key}="
+            # default editor will add a space
+            yield f"|{field.key}= "
         else:
             raise TypeError("type not support", type(field.value))
 
