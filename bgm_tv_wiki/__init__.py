@@ -38,6 +38,9 @@ class Wiki:
     type: str | None = None
     fields: list[Field] = dataclasses.field(default_factory=list)
 
+    def keys(self) -> list[str]:
+        return [f.key for f in self.fields]
+
     def non_zero(self) -> Wiki:
         fields = []
         for f in self.fields:
