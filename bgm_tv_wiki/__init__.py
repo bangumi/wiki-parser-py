@@ -73,16 +73,16 @@ class Wiki:
 
         return ""
 
+    def set(self, key: str, value: str | list[Item] | None = None) -> Wiki:
+        return self.__set(field=Field(key=key, value=value))
+
     def set_values(self, values: dict[str, str | list[Item] | None]) -> Wiki:
         w = self
         for key, value in values.items():
-            w = w.set_field(field=Field(key=key, value=value))
+            w = w.__set(field=Field(key=key, value=value))
         return w
 
-    def set(self, key: str, value: str | list[Item] | None = None) -> Wiki:
-        return self.set_field(field=Field(key=key, value=value))
-
-    def set_field(self, field: Field) -> Wiki:
+    def __set(self, field: Field) -> Wiki:
         fields = []
         for f in self.fields:
             if f.key == field.key:
@@ -90,6 +90,10 @@ class Wiki:
             else:
                 fields.append(f)
 
+        return Wiki(type=self.type, fields=fields)
+
+    def remove(self, key) -> Wiki:
+        fields = [f for f in self.fields if f.key != key]
         return Wiki(type=self.type, fields=fields)
 
     def semantics_equal(self, other: Wiki) -> bool:
