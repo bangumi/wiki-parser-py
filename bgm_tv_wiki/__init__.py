@@ -385,6 +385,6 @@ def __render(w: Wiki) -> Generator[str, None, None]:
 def __render_items(s: list[Item]) -> Generator[str, None, None]:
     for item in s:
         if item.key:
-            yield f"[{item.key}| {item.value}]"
+            yield f"[{item.key}|{item.value}]"
         else:
             yield f"[{item.value}]"
