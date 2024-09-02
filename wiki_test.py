@@ -3,8 +3,8 @@ from typing import Any
 
 import pytest
 import yaml
+from bgm_tv_wiki import Wiki, WikiSyntaxError, parse
 
-from bgm_tv_wiki import Wiki, parse
 
 spec_repo_path = Path(__file__, "../wiki-syntax-spec").resolve()
 
@@ -43,3 +43,18 @@ def test_bangumi_wiki(name: str) -> None:
     assert as_dict(parse(wiki_raw)) == yaml.safe_load(
         file.with_suffix(".yaml").read_text()
     ), name
+
+
+invalid = [
+    file.name
+    for file in spec_repo_path.joinpath("tests/invalid").iterdir()
+    if file.name.endswith(".wiki")
+]
+
+
+@pytest.mark.parametrize("name", invalid)
+def test_bangumi_wiki_invalid(name: str) -> None:
+    file = spec_repo_path.joinpath("tests/invalid", name)
+    wiki_raw = file.read_text()
+    with pytest.raises(WikiSyntaxError):
+        parse(wiki_raw)

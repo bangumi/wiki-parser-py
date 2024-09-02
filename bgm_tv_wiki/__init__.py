@@ -167,7 +167,7 @@ class ExpectingNewFieldError(WikiSyntaxError):
         self,
         lino: int | None = None,
         line: str | None = None,
-        message: str = "missing '=' in line",
+        message: str = "missing '|' at the beginning of line",
     ):
         super().__init__(lino, line, message)
 
@@ -228,7 +228,7 @@ def parse(s: str) -> Wiki:
 
     fields = []
 
-    for lino, line in enumerate(s.splitlines()):
+    for lino, line in enumerate(s.splitlines()[1:-1]):
         lino += line_offset
 
         # now handle line content
@@ -256,19 +256,18 @@ def parse(s: str) -> Wiki:
             fields.append(Field(key=key, value=value))
             continue
 
-        if in_array:
-            if line == "}":  # close array
-                in_array = False
-                fields.append(Field(key=current_key, value=item_container))
-                item_container = []
-                continue
+        if not in_array:
+            raise ExpectingNewFieldError(lino, line)
 
-            # array item
-            key, value = read_array_item(line, lino)
-            item_container.append(Item(key=key, value=value))
+        if line == "}":  # close array
+            in_array = False
+            fields.append(Field(key=current_key, value=item_container))
+            item_container = []
+            continue
 
-        # if not in_array:
-        #     raise ErrExpectingNewField(lino, line)
+        # array item
+        key, value = read_array_item(line, lino)
+        item_container.append(Item(key=key, value=value))
 
     if in_array:
         # array should be close have read all contents
