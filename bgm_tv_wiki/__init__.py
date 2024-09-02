@@ -63,6 +63,7 @@ class Wiki:
         for f in self.fields:
             if f.key == key:
                 return f.value
+        return None
 
     def get_str(self, key: str) -> str:
         for f in self.fields:
@@ -92,7 +93,7 @@ class Wiki:
 
         return Wiki(type=self.type, fields=fields)
 
-    def remove(self, key) -> Wiki:
+    def remove(self, key: str) -> Wiki:
         fields = [f for f in self.fields if f.key != key]
         return Wiki(type=self.type, fields=fields)
 
