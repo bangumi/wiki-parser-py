@@ -37,6 +37,7 @@ class Field:
 class Wiki:
     type: str | None = None
     fields: list[Field] = dataclasses.field(default_factory=list)
+    _eol: str = "\n"
 
     def keys(self) -> list[str]:
         return [f.key for f in self.fields]
@@ -88,11 +89,16 @@ class Wiki:
 
     def __set(self, field: Field) -> Wiki:
         fields = []
+        found = False
         for f in self.fields:
             if f.key == field.key:
                 fields.append(field)
+                found = True
             else:
                 fields.append(f)
+
+        if not found:
+            fields.append(field)
 
         return Wiki(type=self.type, fields=fields)
 
@@ -190,6 +196,13 @@ suffix = "}}"
 
 
 def parse(s: str) -> Wiki:
+    crlf = s.count("\r\n")
+    lf = s.count("\n")
+    if crlf == 0 or lf == 0 or lf > crlf:
+        eol = "\n"
+    else:
+        eol = "\r\n"
+
     s = s.replace("\r\n", "\n")
     s, line_offset = _process_input(s)
     if not s:
@@ -201,7 +214,7 @@ def parse(s: str) -> Wiki:
     if not s.endswith(suffix):
         raise GlobalSuffixError
 
-    w = Wiki(type=read_type(s))
+    w = Wiki(type=read_type(s), _eol=eol)
 
     eol_count = s.count("\n")
     if eol_count <= 1:
@@ -343,7 +356,7 @@ def _process_input(s: str) -> tuple[str, int]:
 
 
 def render(w: Wiki) -> str:
-    return "\n".join(__render(w))
+    return w._eol.join(__render(w))
 
 
 def __render(w: Wiki) -> Generator[str, None, None]:
