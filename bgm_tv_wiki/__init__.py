@@ -36,7 +36,7 @@ class Field:
 @dataclasses.dataclass(slots=True, frozen=True, kw_only=True)
 class Wiki:
     type: str | None = None
-    fields: list[Field] = dataclasses.field(default_factory=list)
+    fields: tuple[Field, ...] = dataclasses.field(default_factory=tuple)
     _eol: str = "\n"
 
     def keys(self) -> list[str]:
@@ -61,7 +61,7 @@ class Wiki:
                     fields.append(Field(key=f.key, value=v))
                 continue
 
-        return Wiki(type=self.type, fields=fields)
+        return Wiki(type=self.type, fields=tuple(fields))
 
     def get(self, key: str) -> str | list[Item] | None:
         for f in self.fields:
@@ -100,10 +100,10 @@ class Wiki:
         if not found:
             fields.append(field)
 
-        return Wiki(type=self.type, fields=fields)
+        return Wiki(type=self.type, fields=tuple(fields))
 
     def remove(self, key: str) -> Wiki:
-        fields = [f for f in self.fields if f.key != key]
+        fields = tuple(f for f in self.fields if f.key != key)
         return Wiki(type=self.type, fields=fields)
 
     def semantics_equal(self, other: Wiki) -> bool:
@@ -214,17 +214,19 @@ def parse(s: str) -> Wiki:
     if not s.endswith(suffix):
         raise GlobalSuffixError
 
-    w = Wiki(type=read_type(s), _eol=eol)
+    wiki_type = read_type(s)
 
     eol_count = s.count("\n")
     if eol_count <= 1:
-        return w
+        return Wiki(type=wiki_type, _eol=eol)
 
     item_container: list[Item] = []
 
     # loop state
     in_array: bool = False
     current_key: str = ""
+
+    fields = []
 
     for lino, line in enumerate(s.splitlines()):
         lino += line_offset
@@ -244,20 +246,20 @@ def parse(s: str) -> Wiki:
             key, value = read_start_line(line, lino)  # read "key = value"
 
             if not value:
-                w.fields.append(Field(key=key))
+                fields.append(Field(key=key))
                 continue
             if value == "{":
                 in_array = True
                 current_key = key
                 continue
 
-            w.fields.append(Field(key=key, value=value))
+            fields.append(Field(key=key, value=value))
             continue
 
         if in_array:
             if line == "}":  # close array
                 in_array = False
-                w.fields.append(Field(key=current_key, value=item_container))
+                fields.append(Field(key=current_key, value=item_container))
                 item_container = []
                 continue
 
@@ -272,7 +274,7 @@ def parse(s: str) -> Wiki:
         # array should be close have read all contents
         raise ArrayNoCloseError(s.count("\n") + line_offset, s.splitlines()[-2])
 
-    return w
+    return Wiki(type=wiki_type, fields=tuple(fields), _eol=eol)
 
 
 def read_type(s: str) -> str:
