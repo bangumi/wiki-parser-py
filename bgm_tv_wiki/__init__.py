@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 from collections.abc import Generator
 
+
 __all__ = (
     "ArrayNoCloseError",
     "ExpectingNewFieldError",
@@ -58,9 +59,14 @@ class Wiki:
 
         return Wiki(type=self.type, fields=fields)
 
+    def get(self, key: str) -> str | list[Item] | None:
+        for f in self.fields:
+            if f.key == key:
+                return f.value
+
     def get_str(self, key: str) -> str:
         for f in self.fields:
-            if f.key == f:
+            if f.key == key:
                 if isinstance(f.value, str):
                     return f.value
                 raise ValueError(f"value of {key!r} is {type(f.value)}, not str")
