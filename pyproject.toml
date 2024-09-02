@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "bgm-tv-wiki"
-version = "0.0.8"
+version = "0.0.9"
 description = "bgm.tv wiki syntax parser"
 authors = [
     { name = "trim21", email = "trim21me@gmail.com" },
