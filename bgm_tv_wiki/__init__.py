@@ -39,8 +39,14 @@ class Wiki:
     fields: tuple[Field, ...] = dataclasses.field(default_factory=tuple)
     _eol: str = "\n"
 
-    def keys(self) -> list[str]:
-        return [f.key for f in self.fields]
+    _keys: tuple[str, ...] = ()
+
+    def __post_init__(self):
+        # not sure if this works on other python impl
+        object.__setattr__(self, "_keys", tuple(f.key for f in self.fields))
+
+    def keys(self) -> tuple[str, ...]:
+        return self._keys
 
     def non_zero(self) -> Wiki:
         fields = []
@@ -79,7 +85,47 @@ class Wiki:
         return ""
 
     def set(self, key: str, value: str | list[Item] | None = None) -> Wiki:
+        """Update or append field value"""
         return self.__set(field=Field(key=key, value=value))
+
+    def index_of(self, key: str) -> int:
+        """Find index by field key.
+
+        This method doesn't raise IndexError but return length of fields,
+        to work with `set_or_insert`
+
+        Do not use this method to check if key exists in fields, ust `key in wiki.keys()` instead
+        """
+        for i, f in enumerate(self.fields):
+            if f.key == key:
+                return i
+        return len(self.fields)
+
+    def set_or_insert(
+        self, key: str, value: str | list[Item] | None, index: int
+    ) -> Wiki:
+        """If key exists, update current value.
+        Overview insert field after give index
+
+        Could be used with `index_of` to update
+
+        ```python
+        w = w.set_or_insert(
+            "b",
+            ...,
+            w.index_of("a"),
+        )
+        ```
+
+        This will insert field `b` after field `a` if field 'a' exists, or append it to the end.
+        """
+        if key in self.keys():
+            return self.__set(field=Field(key=key, value=value))
+
+        fields = list(self.fields)
+        fields.insert(index + 1, Field(key=key, value=value))
+
+        return Wiki(type=self.type, fields=tuple(fields), _eol=self._eol)
 
     def set_values(self, values: dict[str, str | list[Item] | None]) -> Wiki:
         w = self

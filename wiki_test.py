@@ -58,3 +58,58 @@ def test_bangumi_wiki_invalid(name: str) -> None:
     wiki_raw = file.read_text()
     with pytest.raises(WikiSyntaxError):
         parse(wiki_raw)
+
+
+def test_index_of():
+    w = parse(
+        "\n".join(
+            [
+                "{{Infobox animanga/Manga",
+                "|a= 9784061822337",
+                "|b= 4061822330",
+                "}}",
+            ]
+        )
+    )
+
+    assert w.index_of("a") == 0
+    assert w.index_of("b") == 1
+    assert w.index_of("c") == 2
+
+
+def test_set_at():
+    w = parse(
+        "\n".join(
+            [
+                "{{Infobox animanga/Manga",
+                "|a= 9784061822337",
+                "|b= 4061822330",
+                "}}",
+            ]
+        )
+    )
+
+    assert w.set_or_insert("a", "1", 0) == w.set("a", "1")
+    assert w.set_or_insert("c", "1", 0) == parse(
+        "\n".join(
+            [
+                "{{Infobox animanga/Manga",
+                "|a= 9784061822337",
+                "|c= 1",
+                "|b= 4061822330",
+                "}}",
+            ]
+        )
+    )
+
+    assert w.set_or_insert("c", "1", 10) == parse(
+        "\n".join(
+            [
+                "{{Infobox animanga/Manga",
+                "|a= 9784061822337",
+                "|b= 4061822330",
+                "|c= 1",
+                "}}",
+            ]
+        )
+    )
