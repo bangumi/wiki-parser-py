@@ -90,7 +90,7 @@ def test_set_at():
     )
 
     assert w.set_or_insert("a", "1", 0) == w.set("a", "1")
-    assert w.set_or_insert("c", "1", 0) == parse(
+    assert w.set_or_insert("c", "1", 1) == parse(
         "\n".join(
             [
                 "{{Infobox animanga/Manga",

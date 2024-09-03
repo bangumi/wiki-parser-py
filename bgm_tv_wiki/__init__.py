@@ -42,7 +42,6 @@ class Wiki:
     _keys: tuple[str, ...] = ()
 
     def __post_init__(self):
-        # not sure if this works on other python impl
         object.__setattr__(self, "_keys", tuple(f.key for f in self.fields))
 
     def keys(self) -> tuple[str, ...]:
@@ -113,7 +112,7 @@ class Wiki:
         w = w.set_or_insert(
             "b",
             ...,
-            w.index_of("a"),
+            w.index_of("a") + 1,
         )
         ```
 
@@ -123,7 +122,7 @@ class Wiki:
             return self.__set(field=Field(key=key, value=value))
 
         fields = list(self.fields)
-        fields.insert(index + 1, Field(key=key, value=value))
+        fields.insert(index, Field(key=key, value=value))
 
         return Wiki(type=self.type, fields=tuple(fields), _eol=self._eol)
 
