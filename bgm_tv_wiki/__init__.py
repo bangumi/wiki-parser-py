@@ -41,7 +41,7 @@ class Wiki:
 
     _keys: tuple[str, ...] = ()
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         object.__setattr__(self, "_keys", tuple(f.key for f in self.fields))
 
     def keys(self) -> tuple[str, ...]:

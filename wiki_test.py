@@ -60,7 +60,7 @@ def test_bangumi_wiki_invalid(name: str) -> None:
         parse(wiki_raw)
 
 
-def test_cast():
+def test_cast() -> None:
     parse(
         """
 {{Infobox Crt
@@ -85,7 +85,7 @@ def test_cast():
     )
 
 
-def test_index_of():
+def test_index_of() -> None:
     w = parse(
         "\n".join(
             [
@@ -102,7 +102,7 @@ def test_index_of():
     assert w.index_of("c") == 2
 
 
-def test_set_at():
+def test_set_at() -> None:
     w = parse(
         "\n".join(
             [
