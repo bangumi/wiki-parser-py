@@ -74,6 +74,16 @@ class Wiki:
                 return f.value
         return None
 
+    def get_all(self, key: str) -> list[str]:
+        for f in self.fields:
+            if f.key == key:
+                if not f.value:
+                    return []
+                if isinstance(f.value, list):
+                    return [item.value for item in f.value]
+                return [f.value]
+        return []
+
     def get_str(self, key: str) -> str:
         for f in self.fields:
             if f.key == key:

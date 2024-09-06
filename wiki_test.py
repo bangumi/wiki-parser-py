@@ -60,6 +60,31 @@ def test_bangumi_wiki_invalid(name: str) -> None:
         parse(wiki_raw)
 
 
+def test_cast():
+    parse(
+        """
+{{Infobox Crt
+|简体中文名= 绵饴
+|别名={
+[第二中文名|]
+[英文名|]
+[日文名|]
+[纯假名|]
+[罗马字|]
+[昵称|季節P]
+}
+|性别= 男
+|生日=
+|血型=
+|身高=
+|体重=
+|BWH=
+|引用来源= ニコニコ大百科
+}}
+"""
+    )
+
+
 def test_index_of():
     w = parse(
         "\n".join(
