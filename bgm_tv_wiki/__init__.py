@@ -6,6 +6,7 @@ from collections.abc import Generator
 
 __all__ = (
     "ArrayNoCloseError",
+    "DuplicatedKeyError",
     "ExpectingNewFieldError",
     "ExpectingSignEqualError",
     "Field",
