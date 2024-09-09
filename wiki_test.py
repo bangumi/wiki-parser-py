@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 import yaml
-from bgm_tv_wiki import Wiki, WikiSyntaxError, parse
+from bgm_tv_wiki import DuplicatedKeyError, Wiki, WikiSyntaxError, parse
 
 
 spec_repo_path = Path(__file__, "../wiki-syntax-spec").resolve()
@@ -138,3 +138,31 @@ def test_set_at() -> None:
             ]
         )
     )
+
+
+def test_duplicated_keys() -> None:
+    with pytest.raises(DuplicatedKeyError) as e:
+        parse(
+            "\n".join(
+                [
+                    "{{Infobox animanga/Manga",
+                    "|原作= 太田顕喜",
+                    "|作画= むにゅう",
+                    "|作画= むにゅう",
+                    "}}",
+                ]
+            )
+        ).remove_duplicated_fields()
+
+    assert e.value.keys == ["作画"]
+
+    parse(
+        "\n".join(
+            [
+                "{{Infobox animanga/Manga",
+                "|原作= 太田顕喜",
+                "|作画= むにゅう",
+                "}}",
+            ]
+        )
+    ).remove_duplicated_fields()

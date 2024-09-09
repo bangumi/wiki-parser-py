@@ -20,6 +20,8 @@ __all__ = (
     "try_parse",
 )
 
+from collections import OrderedDict
+
 
 @dataclasses.dataclass(slots=True, frozen=True, kw_only=True)
 class Item:
@@ -167,6 +169,41 @@ class Wiki:
         return {f.key: f.value for f in self.fields} == {
             f.key: f.value for f in other.fields
         }
+
+    def remove_duplicated_fields(self) -> Wiki:
+        """Try remove duplicated fields, empty fields will be override"""
+        fields: OrderedDict[str, str | list[Item] | None] = OrderedDict()
+        duplicated_keys: list[str] = []
+        for f in self.fields:
+            if f.key in duplicated_keys:
+                continue
+
+            if f.key not in fields:
+                fields[f.key] = f.value
+                continue
+
+            if not f.value:
+                continue
+
+            if not fields[f.key]:
+                fields[f.key] = f.value
+            else:
+                duplicated_keys.append(f.key)
+
+        if duplicated_keys:
+            raise DuplicatedKeyError(duplicated_keys)
+
+        return Wiki(
+            type=self.type,
+            fields=tuple(Field(key=key, value=value) for key, value in fields.items()),
+            _eol=self._eol,
+        )
+
+
+class DuplicatedKeyError(Exception):
+    def __init__(self, keys: list[str]):
+        super().__init__(f"found duplicated keys {repr(sorted(keys))!r}")
+        self.keys = keys
 
 
 class WikiSyntaxError(Exception):
