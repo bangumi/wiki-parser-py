@@ -188,6 +188,8 @@ class Wiki:
 
             if not fields[f.key]:
                 fields[f.key] = f.value
+            elif fields[f.key] == f.value:
+                continue
             else:
                 duplicated_keys.append(f.key)
 
