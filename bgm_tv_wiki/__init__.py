@@ -202,6 +202,12 @@ class Wiki:
             _eol=self._eol,
         )
 
+    def __str__(self) -> str:
+        return render(self)
+
+    def render(self) -> str:
+        return render(self)
+
 
 class DuplicatedKeyError(Exception):
     def __init__(self, keys: list[str]):
