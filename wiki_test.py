@@ -185,3 +185,29 @@ def test_duplicated_keys() -> None:
             ]
         )
     ).remove_duplicated_fields()
+
+
+def test_equal():
+    parse(
+        "\n".join(
+            [
+                "{{Infobox Album",
+                "|1=1",
+                "|2=2",
+                "|3=",
+                "}}",
+            ]
+        )
+    ).semantically_equal(
+        parse(
+            "\n".join(
+                [
+                    "{{Infobox Album",
+                    "|3=",
+                    "|2=2",
+                    "|1=1",
+                    "}}",
+                ]
+            )
+        )
+    )

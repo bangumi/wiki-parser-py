@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+from collections import OrderedDict
 from collections.abc import Generator
 
 
@@ -21,8 +22,6 @@ __all__ = (
     "try_parse",
 )
 
-from collections import OrderedDict
-
 
 @dataclasses.dataclass(slots=True, frozen=True, kw_only=True)
 class Item:
@@ -34,6 +33,20 @@ class Item:
 class Field:
     key: str
     value: str | list[Item] | None = None
+
+    def __lt__(self, other: Field) -> bool:
+        if self.key != other.key:
+            return self.key < other.key
+
+        # None < str < list[Item]
+        return self.__value_emp_key() < other.__value_emp_key()
+
+    def __value_emp_key(self) -> int:
+        if self.value is None:
+            return 1
+        if isinstance(self.value, str):
+            return 2
+        return 3
 
 
 @dataclasses.dataclass(slots=True, frozen=True, kw_only=True)
@@ -164,12 +177,11 @@ class Wiki:
         fields = tuple(f for f in self.fields if f.key != key)
         return Wiki(type=self.type, fields=fields, _eol=self._eol)
 
-    def semantics_equal(self, other: Wiki) -> bool:
+    def semantically_equal(self, other: Wiki) -> bool:
         if self.type != other.type:
             return False
-        return {f.key: f.value for f in self.fields} == {
-            f.key: f.value for f in other.fields
-        }
+
+        return sorted(self.fields) == sorted(other.fields)
 
     def remove_duplicated_fields(self) -> Wiki:
         """Try remove duplicated fields, empty fields will be override"""
