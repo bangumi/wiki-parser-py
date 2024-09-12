@@ -63,6 +63,9 @@ class Wiki:
     def keys(self) -> tuple[str, ...]:
         return self._keys
 
+    def field_keys(self) -> tuple[str, ...]:
+        return self._keys
+
     def non_zero(self) -> Wiki:
         fields = []
         for f in self.fields:
@@ -163,6 +166,8 @@ class Wiki:
         found = False
         for f in self.fields:
             if f.key == field.key:
+                if found:
+                    continue
                 fields.append(field)
                 found = True
             else:
