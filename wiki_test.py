@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 import yaml
-from bgm_tv_wiki import DuplicatedKeyError, Wiki, WikiSyntaxError, parse
+from bgm_tv_wiki import DuplicatedKeyError, Field, Wiki, WikiSyntaxError, parse
 
 
 spec_repo_path = Path(__file__, "../wiki-syntax-spec").resolve()
@@ -12,7 +12,7 @@ spec_repo_path = Path(__file__, "../wiki-syntax-spec").resolve()
 def as_dict(w: Wiki) -> dict[str, Any]:
     data = []
     for f in w.fields:
-        if isinstance(f.value, list):
+        if isinstance(f.value, tuple):
             data.append(
                 {
                     "key": f.key,
@@ -83,6 +83,15 @@ def test_cast() -> None:
 }}
 """
     )
+
+
+def test_field_semantically_equal() -> None:
+    assert not Field(key="a").semantically_equal(Field(key="b"))
+
+    assert Field(key="a", value=None).semantically_equal(Field(key="a", value=""))
+
+    assert not Field(key="a", value=None).semantically_equal(Field(key="a", value=()))
+    assert not Field(key="a", value="").semantically_equal(Field(key="a", value=()))
 
 
 def test_index_of() -> None:
@@ -187,7 +196,7 @@ def test_duplicated_keys() -> None:
     ).remove_duplicated_fields()
 
 
-def test_equal():
+def test_equal() -> None:
     parse(
         "\n".join(
             [

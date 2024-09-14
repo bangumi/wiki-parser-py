@@ -1,0 +1,71 @@
+name: tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    tags-ignore:
+      - "*"
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: ./.github/workflows/_build_wheels.yaml
+
+  twine-check:
+    name: Check dist
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+
+      - run: pipx run twine check --strict dist/*
+
+  test-cp:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - "windows-latest"
+          - "ubuntu-22.04"
+          - "macos-13"
+          - "macos-14"
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "~3.13.0-rc.1"
+
+    runs-on: "${{ matrix.os }}"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - run: pip install -e '.[dev]'
+
+      - run: python -m pytest
+
+  test-pass:
+    needs:
+      - test-cp
+      - twine-check
+    runs-on: 'ubuntu-latest'
+    steps:
+      - run: 'echo success'

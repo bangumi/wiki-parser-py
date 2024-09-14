@@ -1,6 +1,6 @@
 [build-system]
-requires = ["flit-core~=3.9"]
-build-backend = "flit_core.buildapi"
+requires = ["hatchling>=1.20.0"]
+build-backend = "hatchling.build"
 
 [project]
 name = "bgm-tv-wiki"
@@ -34,7 +34,22 @@ dev = [
 ]
 
 [project.urls]
-#Homepage = "https://github.com/trim21/rtorrent-rpc"
+
+[tool.hatch.build.targets.sdist]
+include = ['bgm_tv_wiki']
+
+[tool.hatch.build.targets.wheel]
+packages = ["bgm_tv_wiki"]
+
+[tool.hatch.build.targets.wheel.hooks.mypyc]
+enable-by-default = false
+dependencies = ["hatch-mypyc", 'mypy==1.11.2']
+mypy-args = [
+    "--disallow-untyped-defs",
+]
+
+[tool.cibuildwheel.environment]
+HATCH_BUILD_HOOKS_ENABLE = "1"
 
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'

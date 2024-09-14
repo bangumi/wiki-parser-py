@@ -25,9 +25,7 @@ jobs:
         with:
           action: add
           linters: mypy
-
-      - name: mypy
-        run: mypy --show-column-numbers .
+          run: mypy --show-column-numbers --disallow-untyped-defs .
 
   pre-commit:
     runs-on: ubuntu-latest

@@ -32,7 +32,7 @@ class Item:
 @dataclasses.dataclass(slots=True, frozen=True, kw_only=True)
 class Field:
     key: str
-    value: str | list[Item] | None = None
+    value: str | tuple[Item, ...] | None = None
 
     def __lt__(self, other: Field) -> bool:
         if self.key != other.key:
@@ -40,6 +40,18 @@ class Field:
 
         # None < str < list[Item]
         return self.__value_emp_key() < other.__value_emp_key()
+
+    def semantically_equal(self, other: Field) -> bool:
+        if self.key != other.key:
+            return False
+
+        if isinstance(self.value, tuple) or isinstance(other.value, tuple):
+            return self.value == other.value
+
+        if not self.value and not other.value:
+            return True
+
+        return self.value == other.value
 
     def __value_emp_key(self) -> int:
         if self.value is None:
@@ -82,12 +94,12 @@ class Wiki:
             if isinstance(value, list):
                 v = [x for x in value if x.key or x.value]
                 if v:
-                    fields.append(Field(key=f.key, value=v))
+                    fields.append(Field(key=f.key, value=tuple(v)))
                 continue
 
         return Wiki(type=self.type, fields=tuple(fields), _eol=self._eol)
 
-    def get(self, key: str) -> str | list[Item] | None:
+    def get(self, key: str) -> str | tuple[Item, ...] | None:
         for f in self.fields:
             if f.key == key:
                 return f.value
@@ -98,7 +110,7 @@ class Wiki:
             if f.key == key:
                 if not f.value:
                     return []
-                if isinstance(f.value, list):
+                if isinstance(f.value, tuple):
                     return [item.value for item in f.value]
                 return [f.value]
         return []
@@ -112,7 +124,7 @@ class Wiki:
 
         return ""
 
-    def set(self, key: str, value: str | list[Item] | None = None) -> Wiki:
+    def set(self, key: str, value: str | tuple[Item, ...] | None = None) -> Wiki:
         """Update or append field value"""
         return self.__set(field=Field(key=key, value=value))
 
@@ -130,7 +142,7 @@ class Wiki:
         return len(self.fields)
 
     def set_or_insert(
-        self, key: str, value: str | list[Item] | None, index: int
+        self, key: str, value: str | tuple[Item, ...] | None, index: int
     ) -> Wiki:
         """If key exists, update current value.
         Overview insert field after give index
@@ -155,7 +167,7 @@ class Wiki:
 
         return Wiki(type=self.type, fields=tuple(fields), _eol=self._eol)
 
-    def set_values(self, values: dict[str, str | list[Item] | None]) -> Wiki:
+    def set_values(self, values: dict[str, str | tuple[Item, ...] | None]) -> Wiki:
         w = self
         for key, value in values.items():
             w = w.__set(field=Field(key=key, value=value))
@@ -186,11 +198,17 @@ class Wiki:
         if self.type != other.type:
             return False
 
-        return sorted(self.fields) == sorted(other.fields)
+        if len(self.fields) != len(other.fields):
+            return False
+
+        return all(
+            a.semantically_equal(b)
+            for a, b in zip(sorted(self.fields), sorted(other.fields), strict=True)
+        )
 
     def remove_duplicated_fields(self) -> Wiki:
         """Try remove duplicated fields, empty fields will be override"""
-        fields: OrderedDict[str, str | list[Item] | None] = OrderedDict()
+        fields: OrderedDict[str, str | tuple[Item, ...] | None] = OrderedDict()
         duplicated_keys: list[str] = []
         for f in self.fields:
             if f.key in duplicated_keys:
@@ -379,7 +397,7 @@ def parse(s: str) -> Wiki:
 
         if line == "}":  # close array
             in_array = False
-            fields.append(Field(key=current_key, value=item_container))
+            fields.append(Field(key=current_key, value=tuple(item_container)))
             item_container = []
             continue
 
@@ -463,13 +481,12 @@ def _process_input(s: str) -> tuple[str, int]:
     s = "\n".join(s.splitlines())
 
     for c in s:
-        match c:
-            case "\n":
-                offset += 1
-            case " ", "\t":
-                continue
-            case _:
-                return s.strip(), offset
+        if c == "\n":
+            offset += 1
+        elif c == " " or c == "\t":
+            continue
+        else:
+            return s.strip(), offset
 
     return s.strip(), offset
 
@@ -487,7 +504,7 @@ def __render(w: Wiki) -> Generator[str, None, None]:
     for field in w.fields:
         if isinstance(field.value, str):
             yield f"|{field.key}= {field.value}"
-        elif isinstance(field.value, list):
+        elif isinstance(field.value, tuple):
             yield f"|{field.key}={{"
             yield from __render_items(field.value)
             yield "}"
@@ -500,7 +517,7 @@ def __render(w: Wiki) -> Generator[str, None, None]:
     yield "}}"
 
 
-def __render_items(s: list[Item]) -> Generator[str, None, None]:
+def __render_items(s: tuple[Item, ...]) -> Generator[str, None, None]:
     for item in s:
         if item.key:
             yield f"[{item.key}|{item.value}]"

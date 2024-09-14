@@ -3,23 +3,24 @@ name: release
 on:
   push:
     tags:
-      - v*
-
-permissions:
-  contents: write
+      - 'v*'
 
 jobs:
-  release:
+  build:
+    uses: ./.github/workflows/_build_wheels.yaml
+
+  pypi:
+    name: Upload wheels to PyPI
+    needs: [build]
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - uses: actions/download-artifact@v4
         with:
-          python-version: '3.x'
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
 
-      - run: pipx run flit publish
+      - run: pipx run twine upload dist/* --disable-progress-bar
         env:
-          FLIT_USERNAME: '__token__'
-          FLIT_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+          TWINE_USERNAME: '__token__'
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}

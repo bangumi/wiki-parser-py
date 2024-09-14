@@ -1,0 +1,58 @@
+name: Reusable workflow example
+
+on:
+  workflow_call:
+
+jobs:
+  build_wheels:
+    name: Build wheels
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+#          - { os: macos-12, arch: x86_64, build: "*" }
+#          - { os: macos-12, arch: arm64, build: "*" }
+          - { os: windows-latest, arch: AMD64, build: "*" }
+          - { os: ubuntu-latest, arch: x86_64, build: "*" }
+#          - { os: ubuntu-latest, arch: aarch64, build: "*[61]-manylinux*" }
+#          - { os: ubuntu-latest, arch: aarch64, build: "*[72]-manylinux*" }
+#          - { os: ubuntu-latest, arch: aarch64, build: "*[83]-manylinux*" }
+#          - { os: ubuntu-latest, arch: aarch64, build: "*[94]-manylinux*" }
+#          - { os: ubuntu-latest, arch: aarch64, build: "*[05]-manylinux*" }
+#          - { os: ubuntu-latest, arch: aarch64, build: "*[61]-musllinux*" }
+#          - { os: ubuntu-latest, arch: aarch64, build: "*[72]-musllinux*" }
+#          - { os: ubuntu-latest, arch: aarch64, build: "*[83]-musllinux*" }
+#          - { os: ubuntu-latest, arch: aarch64, build: "*[94]-musllinux*" }
+#          - { os: ubuntu-latest, arch: aarch64, build: "*[05]-musllinux*" }
+    steps:
+      - uses: docker/setup-qemu-action@v3
+        if: matrix.os == 'ubuntu-latest'
+
+      - uses: actions/checkout@v4
+
+      - uses: pypa/cibuildwheel@v2.20.0
+        env:
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_ARCHS: ${{ matrix.arch }}
+          CIBW_BUILD: ${{ matrix.build }}
+          CIBW_SKIP: 'pp*,cp313-*'
+
+      - run: ls ./wheelhouse/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 'wheels-${{ runner.os }}-${{ matrix.arch }}-${{ strategy.job-index }}'
+          path: ./wheelhouse/*.whl
+
+  build:
+    name: make sdist and wheel
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - run: pipx run build
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: 'wheels-dist'
+        path: dist/*
