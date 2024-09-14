@@ -35,7 +35,6 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_BUILD: ${{ matrix.build }}
-          CIBW_SKIP: 'pp* cp313-*'
 
       - run: ls ./wheelhouse/
 
