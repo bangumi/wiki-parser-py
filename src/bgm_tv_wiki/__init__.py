@@ -177,13 +177,14 @@ class Wiki:
         fields = []
         found = False
         for f in self.fields:
-            if f.key == field.key:
-                if found:
-                    continue
-                fields.append(field)
-                found = True
-            else:
+            if f.key != field.key:
                 fields.append(f)
+                continue
+
+            if found:
+                continue
+            fields.append(field)
+            found = True
 
         if not found:
             fields.append(field)

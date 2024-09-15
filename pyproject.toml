@@ -36,17 +36,19 @@ dev = [
 [project.urls]
 
 [tool.hatch.build.targets.sdist]
-include = ['bgm_tv_wiki']
+sources = ['src/']
+include = ['src/']
 
 [tool.hatch.build.targets.wheel]
-packages = ["bgm_tv_wiki"]
+packages = ["src/bgm_tv_wiki"]
 
 [tool.hatch.build.targets.wheel.hooks.cython]
 enable-by-default = false
 dependencies = ["hatch-cython<1"]
 
 [tool.hatch.build.targets.wheel.hooks.cython.options]
-directives = { boundscheck = true, nonecheck = false, language_level = 3, binding = true }
+directives = { boundscheck = false, nonecheck = false, language_level = 3, binding = true }
+src = "bgm_tv_wiki"
 
 [tool.cibuildwheel]
 before-build = "python cleanup.py"
@@ -65,8 +67,6 @@ ignore_missing_imports = true
 warn_return_any = false
 warn_unused_configs = true
 show_error_codes = true
-
-platform = 'unix'
 
 [tool.black]
 target-version = ['py310']
