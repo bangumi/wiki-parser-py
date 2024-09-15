@@ -52,7 +52,7 @@ src = "bgm_tv_wiki"
 
 [tool.cibuildwheel]
 before-build = "python cleanup.py"
-skip = "pp*"
+skip = "pp* *musllinux*"
 
 [tool.cibuildwheel.environment]
 HATCH_BUILD_HOOKS_ENABLE = "1"
