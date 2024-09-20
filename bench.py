@@ -28,6 +28,20 @@ raw = """{{Infobox animanga/TVAnime
 |製作= 【推しの子】製作委員会（KADOKAWA、集英社、動画工房、CyberAgent）
 |企画= 菊池剛、工藤大丈、大好誠
 |制片人= 吉岡拓也、山下愼平、岡川広樹、鎌田肇、青村陽介
+|别名={
+[[Oshi no Ko] 2nd Season]
+["Oshi no Ko" 2]
+["Oshi no Ko" 2]
+["Oshi no Ko" 2]
+["Oshi no Ko" 2]
+["Oshi no Ko" 2]
+["Oshi no Ko" 2]
+["Oshi no Ko" 2]
+["Oshi no Ko" 2]
+["Oshi no Ko" 2]
+["Oshi no Ko" 2]
+["Oshi no Ko" 2]
+}
 |执行制片人= 田中翔、薄井勝太郎、石黒竜、椛嶋麻菜美
 |原作协力= 増澤吉和、大沢太郎、酒井浩希
 |协力= 根岸弦輝、笠原周造、清原誠巳、中山卓也、石澤紀子、尾形光広、井上智代、神原葉月

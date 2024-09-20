@@ -4,6 +4,7 @@ import dataclasses
 from collections import OrderedDict
 from collections.abc import Generator
 
+from deprecated import deprecated
 
 __all__ = (
     "ArrayNoCloseError",
@@ -115,6 +116,25 @@ class Wiki:
                 return [f.value]
         return []
 
+    def get_as_str(self, key: str) -> str:
+        """
+        return empty string if key not exists or empty,
+        throw ValueError if value is a array
+        """
+
+        for f in self.fields:
+            if f.key == key:
+                if not f.value:
+                    return ""
+
+                if isinstance(f.value, tuple):
+                    raise ValueError(f"value of {key!r} is {type(f.value)}, not str")
+
+                return f.value
+
+        return ""
+
+    @deprecated("use get_as_str instead", version="0.0.24")
     def get_str(self, key: str) -> str:
         for f in self.fields:
             if f.key == key:

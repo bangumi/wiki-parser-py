@@ -20,6 +20,7 @@ classifiers = [
 requires-python = "~=3.10"
 
 dependencies = [
+    'Deprecated>=1,<2'
 ]
 
 [project.optional-dependencies]
