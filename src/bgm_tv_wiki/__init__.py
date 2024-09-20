@@ -4,7 +4,7 @@ import dataclasses
 from collections import OrderedDict
 from collections.abc import Generator
 
-from deprecated import deprecated
+from typing_extensions import deprecated
 
 __all__ = (
     "ArrayNoCloseError",
@@ -134,7 +134,7 @@ class Wiki:
 
         return ""
 
-    @deprecated("use get_as_str instead", version="0.0.24")
+    @deprecated("use get_as_str instead")
     def get_str(self, key: str) -> str:
         for f in self.fields:
             if f.key == key:
