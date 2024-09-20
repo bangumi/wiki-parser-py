@@ -20,7 +20,7 @@ classifiers = [
 requires-python = "~=3.10"
 
 dependencies = [
-    'Deprecated>=1,<2'
+    'typing-extensions>=4.7.0'
 ]
 
 [project.optional-dependencies]
