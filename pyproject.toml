@@ -76,6 +76,8 @@ target-version = ['py310']
 target-version = "py310"
 
 [tool.ruff.lint]
+extend-select = ['UP', 'I']
+
 ignore = [
     'PLW2901',
     'PLR0911',

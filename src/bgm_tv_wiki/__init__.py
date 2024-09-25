@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import dataclasses
 from collections import OrderedDict
-from collections.abc import Generator
+from collections.abc import Generator, Sequence
+from typing import TypeAlias
 
 from typing_extensions import deprecated
 
@@ -28,6 +29,10 @@ __all__ = (
 class Item:
     key: str = ""
     value: str = ""
+
+
+ValueType: TypeAlias = str | tuple[Item, ...] | None
+ValueInputType: TypeAlias = str | Sequence[Item] | None
 
 
 @dataclasses.dataclass(slots=True, frozen=True, kw_only=True)
@@ -116,6 +121,16 @@ class Wiki:
                 return [f.value]
         return []
 
+    def get_as_items(self, key: str) -> list[Item]:
+        for f in self.fields:
+            if f.key == key:
+                if not f.value:
+                    return []
+                if isinstance(f.value, tuple):
+                    return list(f.value)
+                return [Item(value=f.value)]
+        return []
+
     def get_as_str(self, key: str) -> str:
         """
         return empty string if key not exists or empty,
@@ -144,8 +159,11 @@ class Wiki:
 
         return ""
 
-    def set(self, key: str, value: str | tuple[Item, ...] | None = None) -> Wiki:
+    def set(self, key: str, value: str | Sequence[Item] | None = None) -> Wiki:
         """Update or append field value"""
+        if isinstance(value, Sequence) and not isinstance(value, str):
+            value = tuple(value)
+
         return self.__set(field=Field(key=key, value=value))
 
     def index_of(self, key: str) -> int:
@@ -162,7 +180,7 @@ class Wiki:
         return len(self.fields)
 
     def set_or_insert(
-        self, key: str, value: str | tuple[Item, ...] | None, index: int
+        self, key: str, value: str | Sequence[Item] | None, index: int
     ) -> Wiki:
         """If key exists, update current value.
         Overview insert field after give index
@@ -180,7 +198,10 @@ class Wiki:
         This will insert field `b` after field `a` if field 'a' exists, or append it to the end.
         """
         if key in self.keys():
-            return self.__set(field=Field(key=key, value=value))
+            return self.set(key=key, value=value)
+
+        if isinstance(value, Sequence) and not isinstance(value, str):
+            value = tuple(value)
 
         fields = list(self.fields)
         fields.insert(index, Field(key=key, value=value))
