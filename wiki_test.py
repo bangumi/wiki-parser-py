@@ -3,8 +3,8 @@ from typing import Any
 
 import pytest
 import yaml
-from bgm_tv_wiki import DuplicatedKeyError, Field, Wiki, WikiSyntaxError, parse
 
+from bgm_tv_wiki import DuplicatedKeyError, Field, Wiki, WikiSyntaxError, parse
 
 spec_repo_path = Path(__file__, "../wiki-syntax-spec").resolve()
 

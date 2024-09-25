@@ -1,6 +1,5 @@
 from bgm_tv_wiki import parse
 
-
 raw = """{{Infobox animanga/TVAnime
 |中文名= 【我推的孩子】 第二季
 |别名={
