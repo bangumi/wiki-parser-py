@@ -48,8 +48,14 @@ enable-by-default = false
 dependencies = ["hatch-cython<1"]
 
 [tool.hatch.build.targets.wheel.hooks.cython.options]
-directives = { boundscheck = false, nonecheck = false, language_level = 3, binding = true }
 src = "bgm_tv_wiki"
+
+[tool.hatch.build.targets.wheel.hooks.cython.options.directives]
+boundscheck = false
+nonecheck = false
+language_level = 3
+binding = true
+freethreading_compatible = true
 
 [tool.cibuildwheel]
 before-build = "python cleanup.py"
