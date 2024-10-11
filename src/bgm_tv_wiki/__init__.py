@@ -273,6 +273,9 @@ class Wiki:
         if duplicated_keys:
             raise DuplicatedKeyError(duplicated_keys)
 
+        if len(fields) == len(self.fields):
+            return self
+
         return Wiki(
             type=self.type,
             fields=tuple(Field(key=key, value=value) for key, value in fields.items()),
