@@ -24,12 +24,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+mypy = [
+    'mypy==1.11.2',
+]
+
 dev = [
+    'bgm-tv-wiki[mypy]',
+
     "pytest==8.3.3",
     "pytest-github-actions-annotate-failures==0.2.0",
     "coverage==7.6.2",
-    'pre-commit==4.0.1; python_version >= "3.9"',
-    'mypy==1.11.2; python_version >= "3.9"',
+    'pre-commit==4.0.1',
     'pyyaml>=6,<7',
     'types-PyYAML'
 ]
@@ -42,17 +47,20 @@ include = ['src/']
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/bgm_tv_wiki"]
+include = ['src/*']
 
-[tool.hatch.build.targets.wheel.hooks.cython]
+[tool.hatch.build.targets.wheel.hooks.mypyc]
+# for pure python wheel
 enable-by-default = false
-dependencies = ["hatch-cython<1"]
-
-[tool.hatch.build.targets.wheel.hooks.cython.options]
-directives = { boundscheck = false, nonecheck = false, language_level = 3, binding = true }
-src = "bgm_tv_wiki"
+feature = ['mypy']
+dependencies = [
+    "hatch-mypyc",
+]
+mypy-args = [
+    "--disallow-untyped-defs",
+]
 
 [tool.cibuildwheel]
-before-build = "python cleanup.py"
 skip = "pp* *musllinux*"
 
 [tool.cibuildwheel.environment]
