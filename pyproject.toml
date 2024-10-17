@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling>=1.20.0"]
-build-backend = "hatchling.build"
+requires = ["setuptools", "mypy[mypyc]"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "bgm-tv-wiki"
@@ -30,7 +30,6 @@ mypy = [
 
 dev = [
     'bgm-tv-wiki[mypy]',
-
     "pytest==8.3.3",
     "pytest-github-actions-annotate-failures==0.2.0",
     "coverage==7.6.3",
@@ -41,30 +40,8 @@ dev = [
 
 [project.urls]
 
-[tool.hatch.build.targets.sdist]
-sources = ['src/']
-include = ['src/']
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/bgm_tv_wiki"]
-include = ['src/*']
-
-[tool.hatch.build.targets.wheel.hooks.mypyc]
-# for pure python wheel
-enable-by-default = false
-feature = ['mypy']
-dependencies = [
-    "hatch-mypyc",
-]
-mypy-args = [
-    "--disallow-untyped-defs",
-]
-
 [tool.cibuildwheel]
 skip = "pp* *musllinux*"
-
-[tool.cibuildwheel.environment]
-HATCH_BUILD_HOOKS_ENABLE = "1"
 
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'
