@@ -5,8 +5,6 @@ from collections import OrderedDict
 from collections.abc import Generator, Sequence
 from typing import TypeAlias
 
-from typing_extensions import deprecated
-
 __all__ = (
     "ArrayNoCloseError",
     "DuplicatedKeyError",
@@ -146,16 +144,6 @@ class Wiki:
                     raise ValueError(f"value of {key!r} is {type(f.value)}, not str")
 
                 return f.value
-
-        return ""
-
-    @deprecated("use get_as_str instead")
-    def get_str(self, key: str) -> str:
-        for f in self.fields:
-            if f.key == key:
-                if isinstance(f.value, str):
-                    return f.value
-                raise ValueError(f"value of {key!r} is {type(f.value)}, not str")
 
         return ""
 
