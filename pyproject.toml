@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools", "mypy[mypyc]"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.20.0"]
+build-backend = "hatchling.build"
 
 [project]
 name = "bgm-tv-wiki"
@@ -24,24 +24,39 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-mypy = [
-    'mypy==1.12.0',
-]
-
 dev = [
-    'bgm-tv-wiki[mypy]',
     "pytest==8.3.3",
     "pytest-github-actions-annotate-failures==0.2.0",
     "coverage==7.6.3",
-    'pre-commit==4.0.1',
+    'pre-commit==4.0.1; python_version >= "3.9"',
+    'mypy==1.12.0; python_version >= "3.9"',
     'pyyaml>=6,<7',
     'types-PyYAML'
 ]
 
 [project.urls]
 
+[tool.hatch.build.targets.sdist]
+sources = ['src/']
+include = ['src/']
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bgm_tv_wiki"]
+
+[tool.hatch.build.targets.wheel.hooks.cython]
+enable-by-default = false
+dependencies = ["hatch-cython<1"]
+
+[tool.hatch.build.targets.wheel.hooks.cython.options]
+directives = { boundscheck = false, nonecheck = false, language_level = 3, binding = true }
+src = "bgm_tv_wiki"
+
 [tool.cibuildwheel]
+before-build = "python cleanup.py"
 skip = "pp* *musllinux*"
+
+[tool.cibuildwheel.environment]
+HATCH_BUILD_HOOKS_ENABLE = "1"
 
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'
