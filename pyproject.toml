@@ -29,7 +29,7 @@ dev = [
     "pytest-github-actions-annotate-failures==0.2.0",
     "coverage==7.6.3",
     'pre-commit==4.0.1; python_version >= "3.9"',
-    'mypy==1.12.0; python_version >= "3.9"',
+    'mypy==1.12.1; python_version >= "3.9"',
     'pyyaml>=6,<7',
     'types-PyYAML'
 ]
