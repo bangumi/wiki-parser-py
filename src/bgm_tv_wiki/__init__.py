@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import dataclasses
 from collections import OrderedDict
 from collections.abc import Generator, Sequence
-from typing import TypeAlias
+from typing import Any, Final, TypeAlias, final
 
 __all__ = (
     "ArrayNoCloseError",
@@ -24,28 +23,62 @@ __all__ = (
     "ValueInputType",
 )
 
+from typing_extensions import Self
 
-@dataclasses.dataclass(slots=True, frozen=True, kw_only=True)
+
+@final
 class Item:
-    key: str = ""
-    value: str = ""
+    __slots__ = ("key", "value")
+
+    key: Final[str]
+    value: Final[str]
+
+    def __init__(self, key: str = "", value: str = "") -> None:
+        self.key = key
+        self.value = value
+
+    def __eq__(self, other: Any) -> bool:
+        return (
+            isinstance(other, Item)
+            and self.key == other.key
+            and self.value == other.value
+        )
+
+    def __repr__(self) -> str:
+        return f"<Item key={self.key!r} value={self.value!r}>"
 
 
 ValueType: TypeAlias = str | tuple[Item, ...] | None
 ValueInputType: TypeAlias = str | Sequence[Item] | None
 
 
-@dataclasses.dataclass(slots=True, frozen=True, kw_only=True)
+@final
 class Field:
-    key: str
-    value: str | tuple[Item, ...] | None = None
+    __slots__ = ("key", "value")
 
-    def __lt__(self, other: Field) -> bool:
+    key: str
+    value: str | tuple[Item, ...] | None
+
+    def __init__(self, key: str, value: ValueType = None):
+        self.key = key
+        self.value = value
+
+    def __eq__(self, other: Any) -> bool:
+        return (
+            isinstance(other, Field)
+            and self.key == other.key
+            and self.value == other.value
+        )
+
+    def __lt__(self, other: Self) -> bool:
         if self.key != other.key:
             return self.key < other.key
 
         # None < str < list[Item]
         return self.__value_emp_key() < other.__value_emp_key()
+
+    def __repr__(self) -> str:
+        return f"<Field key={self.key!r} value={self.value!r}>"
 
     def semantically_equal(self, other: Field) -> bool:
         if self.key != other.key:
@@ -67,22 +100,44 @@ class Field:
         return 3
 
 
-@dataclasses.dataclass(slots=True, frozen=True, kw_only=True)
+@final
 class Wiki:
-    type: str | None = None
-    fields: tuple[Field, ...] = dataclasses.field(default_factory=tuple)
-    _eol: str = "\n"
+    __slots__ = ("type", "fields", "_eol", "__keys")
 
-    _keys: tuple[str, ...] = ()
+    type: Final[str]
+    fields: Final[tuple[Field, ...]]
+    _eol: Final[str]
+    __keys: Final[tuple[str, ...]]
 
-    def __post_init__(self) -> None:
-        object.__setattr__(self, "_keys", tuple(f.key for f in self.fields))
+    def __init__(
+        self, type: str = "", fields: tuple[Field, ...] = (), _eol: str = "\n"
+    ) -> None:
+        self.type = type
+        self.fields = fields
+        self._eol = _eol
+        self.__keys = tuple(f.key for f in self.fields)
+
+    def __eq__(self, other: Any) -> bool:
+        return (
+            isinstance(other, Wiki)
+            and (self.type == other.type)
+            and (self.fields == other.fields)
+            and (self._eol == other._eol)
+        )
+
+    def replace(self, type: str = "", fields: tuple[Field, ...] = ()) -> Wiki:
+        return Wiki(
+            type=type or self.type, fields=fields or self.fields, _eol=self._eol
+        )
 
     def keys(self) -> tuple[str, ...]:
-        return self._keys
+        return self.__keys
+
+    def __iter__(self) -> Generator[str, None, None]:
+        yield from self.__keys
 
     def field_keys(self) -> tuple[str, ...]:
-        return self._keys
+        return self.__keys
 
     def non_zero(self) -> Wiki:
         fields = []
@@ -271,6 +326,9 @@ class Wiki:
             fields=tuple(Field(key=key, value=value) for key, value in fields.items()),
             _eol=self._eol,
         )
+
+    def __repr__(self) -> str:
+        return f"<Wiki type={self.type!r} fields={self.fields!r} _eol={self._eol!r}>"
 
     def __str__(self) -> str:
         return render(self)
