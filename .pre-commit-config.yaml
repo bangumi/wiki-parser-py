@@ -1,12 +1,13 @@
 exclude: 'wiki-syntax-spec/.*'
 
 repos:
-  - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.22
+  - repo: https://github.com/henryiii/validate-pyproject-schema-store
+    rev: '2024.11.22'
     hooks:
       - id: validate-pyproject
-        # Optional extra validations from SchemaStore:
-        additional_dependencies: [ "validate-pyproject-schema-store[all]" ]
+        args:
+          - --disable
+          - ruff
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
