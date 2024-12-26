@@ -1,11 +1,19 @@
 [build-system]
-requires = ["hatchling>=1.20.0"]
-build-backend = "hatchling.build"
+requires = [
+    "flit-core>=3.10,<4",
+    'cython>=3,<4 ; implementation_name == "cpython"',
+    'meson-python>=0.14.0 ; implementation_name == "cpython"',
+    'meson[ninja]>=1.2.1 ; implementation_name == "cpython"',
+]
+# conditional build c++ extension
+build-backend = "wiki_build"
+backend-path = ["build_backend"]
 
 [project]
 name = "bgm-tv-wiki"
 version = "0.0.29"
 description = "bgm.tv wiki syntax parser"
+requires-python = "~=3.10"
 authors = [
     { name = "trim21", email = "trim21me@gmail.com" },
 ]
@@ -17,12 +25,6 @@ classifiers = [
     'Programming Language :: Python :: 3 :: Only',
 ]
 
-requires-python = "~=3.10"
-
-dependencies = [
-    'typing-extensions>=4.7.0'
-]
-
 [project.optional-dependencies]
 dev = [
     "pytest==8.3.3",
@@ -31,32 +33,16 @@ dev = [
     'pre-commit==4.0.1; python_version >= "3.9"',
     'mypy==1.13.0; python_version >= "3.9"',
     'pyyaml>=6,<7',
-    'types-PyYAML'
+    'types-PyYAML',
 ]
 
 [project.urls]
 
-[tool.hatch.build.targets.sdist]
-sources = ['src/']
-include = ['src/']
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/bgm_tv_wiki"]
-
-[tool.hatch.build.targets.wheel.hooks.cython]
-enable-by-default = false
-dependencies = ["hatch-cython<1"]
-
-[tool.hatch.build.targets.wheel.hooks.cython.options]
-directives = { boundscheck = false, nonecheck = false, language_level = 3, binding = true }
-src = "bgm_tv_wiki"
-
 [tool.cibuildwheel]
-before-build = "python cleanup.py"
 skip = "pp* *musllinux*"
 
 [tool.cibuildwheel.environment]
-HATCH_BUILD_HOOKS_ENABLE = "1"
+WIKI_PARSER_CYTHON = "1"
 
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'
