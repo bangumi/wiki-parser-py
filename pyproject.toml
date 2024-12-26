@@ -6,7 +6,7 @@ requires = [
     'meson[ninja]>=1.2.1 ; implementation_name == "cpython"',
 ]
 # conditional build c++ extension
-build-backend = "buildapi"
+build-backend = "wiki_build"
 backend-path = ["build_backend"]
 
 [project]
