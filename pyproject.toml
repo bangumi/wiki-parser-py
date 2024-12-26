@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "flit-core>=3.10,<4",
-    'cython>=3, <4',
+    'cython>=3,<4 ; implementation_name == "cpython"',
     'meson-python>=0.14.0 ; implementation_name == "cpython"',
     'meson[ninja]>=1.2.1 ; implementation_name == "cpython"',
 ]
