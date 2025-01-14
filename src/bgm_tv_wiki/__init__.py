@@ -97,7 +97,7 @@ class Wiki:
                     fields.append(f)
                 continue
 
-            if isinstance(value, list):
+            if isinstance(value, tuple):
                 v = [x for x in value if x.key or x.value]
                 if v:
                     fields.append(Field(key=f.key, value=tuple(v)))
