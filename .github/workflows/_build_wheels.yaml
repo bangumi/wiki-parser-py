@@ -39,11 +39,11 @@ jobs:
             cibw_build: "*[13579]-* *[13579]t-*"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Restore cached Primes
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         with:
           path: |
             ~\AppData\Local\pypa\cibuildwheel\Cache
@@ -53,7 +53,7 @@ jobs:
           restore-keys: |
             cibuildwheel-${{ runner.os }}-${{ matrix.cibw_arch }}
 
-      - uses: pypa/cibuildwheel@v2.23.2
+      - uses: pypa/cibuildwheel@d04cacbc9866d432033b1d09142936e6a0e2121a # v2.23.2
         env:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
@@ -61,7 +61,7 @@ jobs:
 
       - run: ls ./wheelhouse/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: "wheels-${{ runner.os }}-${{ matrix.cibw_arch }}-${{ strategy.job-index }}"
           path: ./wheelhouse/*.whl
@@ -70,11 +70,11 @@ jobs:
     name: make pure-py wheel
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - run: pipx run build -w
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: "wheels-pure-py"
           path: dist/*
