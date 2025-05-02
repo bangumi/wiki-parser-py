@@ -3,7 +3,7 @@ requires = [
     "flit-core==3.12.0",
     'cython==3.0.12; implementation_name == "cpython"',
     'meson-python==0.17.1; implementation_name == "cpython"',
-    'meson[ninja]==1.7.2; implementation_name == "cpython"',
+    'meson[ninja]==1.8.0; implementation_name == "cpython"',
 ]
 # conditional build c++ extension
 build-backend = "wiki_build"
