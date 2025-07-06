@@ -12,11 +12,11 @@ jobs:
         include:
           - os: macos-13
             cibw_arch: x86_64
-            cibw_build: "*[02468]-* *[02468]t-*"
+            cibw_build: "*[02468]-*"
 
           - os: macos-13
             cibw_arch: x86_64
-            cibw_build: "*[13579]-* *[13579]t-*"
+            cibw_build: "*[13579]-*"
 
           - os: macos-14
             cibw_arch: arm64
@@ -24,19 +24,19 @@ jobs:
 
           - os: windows-latest
             cibw_arch: AMD64
-            cibw_build: "*[02468]-* *[02468]t-*"
+            cibw_build: "*[02468]-*"
 
           - os: windows-latest
             cibw_arch: AMD64
-            cibw_build: "*[13579]-* *[13579]t-*"
+            cibw_build: "*[13579]-*"
 
           - os: ubuntu-latest
             cibw_arch: x86_64
-            cibw_build: "*[02468]-* *[02468]t-*"
+            cibw_build: "*[02468]-*"
 
           - os: ubuntu-latest
             cibw_arch: x86_64
-            cibw_build: "*[13579]-* *[13579]t-*"
+            cibw_build: "*[13579]-*"
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
