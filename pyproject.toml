@@ -29,7 +29,7 @@ classifiers = [
 dev = [
     "pytest==8.4.1",
     "pytest-github-actions-annotate-failures==0.3.0",
-    "coverage==7.9.2",
+    "coverage==7.10.1",
     'mypy==1.17.1; python_version >= "3.9"',
     'pyyaml>=6,<7',
     'types-PyYAML',
