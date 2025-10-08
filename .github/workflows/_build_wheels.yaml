@@ -12,18 +12,18 @@ jobs:
         include:
           - os: macos-14
             cibw_arch: arm64
-            cibw_build: 'cp13*'
-            cibw_settings: "--setup-args='-Dabi=3.10'"
+            cibw_build: 'cp310*'
+            cibw_settings: "setup-args='-Dabi=3.10'"
 
           - os: windows-latest
             cibw_arch: AMD64
-            cibw_build: 'cp13*'
-            cibw_settings: "--setup-args='-Dabi=3.10'"
+            cibw_build: 'cp310*'
+            cibw_settings: "setup-args='-Dabi=3.10'"
 
           - os: ubuntu-latest
             cibw_arch: x86_64
-            cibw_build: 'cp13*'
-            cibw_settings: "--setup-args='-Dabi=3.10'"
+            cibw_build: 'cp310*'
+            cibw_settings: "setup-args='-Dabi=3.10'"
 
           - os: macos-14
             cibw_arch: arm64
