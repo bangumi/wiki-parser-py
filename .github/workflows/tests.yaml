@@ -36,12 +36,13 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - "ubuntu-22.04"
+          - "ubuntu-24.04"
         python-version:
           - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
+          - "3.14"
 
     runs-on: "${{ matrix.os }}"
 
@@ -62,7 +63,7 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - run: pip install -e 'bgm-tv-wiki[dev]' --find-links=./dist/
+      - run: pip install 'bgm-tv-wiki[dev]' --find-links=./dist/
 
       - run: python -m pytest
 
