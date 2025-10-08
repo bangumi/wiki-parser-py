@@ -38,7 +38,7 @@ dev = [
 [project.urls]
 
 [tool.cibuildwheel]
-skip = "pp* *musllinux*"
+skip = "*musllinux*"
 
 [tool.cibuildwheel.environment]
 WIKI_PARSER_CYTHON = "1"
