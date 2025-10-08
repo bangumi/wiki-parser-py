@@ -61,7 +61,7 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - run: pip install -e '.[dev]' --find-links=./dist/
+      - run: pip install -e 'bgm-tv-wiki[dev]' --find-links=./dist/
 
       - run: python -m pytest
 
