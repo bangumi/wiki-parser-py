@@ -19,7 +19,9 @@ jobs:
           python-version: '3.x'
           cache: pip
 
-      - uses: actions/setup-uv@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: true
 
       - run: uv sync --no-install-project --extra=dev
 
