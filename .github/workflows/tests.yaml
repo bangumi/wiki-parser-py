@@ -22,7 +22,7 @@ jobs:
     needs: [ build ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/download-artifact@v5
         with:
           pattern: wheels-*
           path: dist
@@ -30,32 +30,42 @@ jobs:
 
       - run: pipx run twine check --strict dist/*
 
+      - run: pipx run abi3audit --verbose ./dist/*abi3*
+
   test-cp:
+    needs: [ build ]
     strategy:
       fail-fast: false
       matrix:
         os:
-          - "ubuntu-22.04"
+          - "ubuntu-24.04"
         python-version:
           - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
+          - "3.14"
 
     runs-on: "${{ matrix.os }}"
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@v5
         with:
           submodules: true
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - run: pip install -e '.[dev]'
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
+
+      - run: pip install 'bgm-tv-wiki[dev]' --find-links=./dist/
 
       - run: python -m pytest
 
