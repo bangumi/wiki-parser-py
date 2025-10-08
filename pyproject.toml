@@ -37,9 +37,6 @@ dev = [
 [tool.cibuildwheel]
 skip = "*musllinux*"
 
-[tool.cibuildwheel.environment]
-WIKI_PARSER_CYTHON = "1"
-
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'
 
