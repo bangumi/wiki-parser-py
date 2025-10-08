@@ -12,16 +12,16 @@ jobs:
   mypy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
           cache: pip
 
       - run: pip install -e '.[dev]'
 
-      - uses: liskin/gh-problem-matcher-wrap@e7b7beaaafa52524748b31a381160759d68d61fb # v3
+      - uses: liskin/gh-problem-matcher-wrap@v3
         with:
           action: add
           linters: mypy
@@ -30,9 +30,9 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
           cache: pip
