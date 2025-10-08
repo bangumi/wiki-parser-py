@@ -37,6 +37,9 @@ dev = [
 [tool.cibuildwheel]
 skip = "*musllinux*"
 
+[tool.meson-python]
+limited-api = true
+
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'
 
