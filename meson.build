@@ -9,6 +9,8 @@ project(
     meson_version: '>= 1.5.0',
 )
 
+abi = get_option('abi')
+
 py = import('python').find_installation(pure: false)
 
 py.install_sources(
@@ -38,6 +40,7 @@ out = py.extension_module(
     subdir: 'bgm_tv_wiki',
     install: true,
     dependencies: py.dependency(),
+    limited_api: abi,
 )
 
 # support for in-tree build
