@@ -2,7 +2,7 @@ exclude: 'wiki-syntax-spec/.*'
 
 repos:
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: '2024.11.25'
+    rev: '2025.10.25'
     hooks:
       - id: validate-pyproject
         args:
