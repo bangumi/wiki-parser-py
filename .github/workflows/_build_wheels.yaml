@@ -51,7 +51,7 @@ jobs:
             cibw_settings: "setup-args='-Dabi=3.10' setup-args='-Dpython.allow_limited_api=true'"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Restore cached Primes
         id: cache
@@ -83,7 +83,7 @@ jobs:
     name: make pure-py wheel
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - run: pipx run flit build
 
