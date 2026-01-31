@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-  'cython==3.2.3; implementation_name == "cpython"',
+  'cython==3.2.4; implementation_name == "cpython"',
   'meson-python==0.19.0; implementation_name == "cpython"',
   'meson[ninja]==1.10.0; implementation_name == "cpython"',
 ]
