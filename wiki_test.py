@@ -5,6 +5,7 @@ import pytest
 import yaml
 
 from bgm_tv_wiki import DuplicatedKeyError, Field, Wiki, WikiSyntaxError, parse
+from src.bgm_tv_wiki import render
 
 spec_repo_path = Path(__file__, "../wiki-syntax-spec").resolve()
 
@@ -219,4 +220,40 @@ def test_equal() -> None:
                 ]
             )
         )
+    )
+
+
+def test_parse_version() -> None:
+    r = parse(
+        "\n".join(
+            [
+                "{{Infobox animanga/Novel",
+                "|版本:磨铁版=",
+                "|版本:泰国版=",
+                "}}",
+            ]
+        )
+    )
+
+    assert as_dict(r) == {
+        "data": [
+            {
+                "key": "版本:磨铁版",
+                "value": "",
+            },
+            {
+                "key": "版本:泰国版",
+                "value": "",
+            },
+        ],
+        "type": "animanga/Novel",
+    }
+
+    assert render(r) == "\n".join(
+        [
+            "{{Infobox animanga/Novel",
+            "|版本:磨铁版= ",
+            "|版本:泰国版= ",
+            "}}",
+        ]
     )
