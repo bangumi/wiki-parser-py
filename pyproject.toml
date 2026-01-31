@@ -1,8 +1,8 @@
 [build-system]
 requires = [
-    'cython==3.2.3; implementation_name == "cpython"',
-    'meson-python==0.18.0; implementation_name == "cpython"',
-    'meson[ninja]==1.10.0; implementation_name == "cpython"',
+  'cython==3.2.3; implementation_name == "cpython"',
+  'meson-python==0.18.0; implementation_name == "cpython"',
+  'meson[ninja]==1.10.0; implementation_name == "cpython"',
 ]
 build-backend = 'mesonpy'
 
@@ -12,24 +12,24 @@ version = "0.0.33"
 description = "bgm.tv wiki syntax parser"
 requires-python = ">=3.10.0"
 authors = [
-    { name = "trim21", email = "trim21me@gmail.com" },
+  { name = "trim21", email = "trim21me@gmail.com" },
 ]
 readme = 'readme.md'
 license = { text = 'MIT' }
 classifiers = [
-    'Development Status :: 4 - Beta',
-    'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3 :: Only',
+  'Development Status :: 4 - Beta',
+  'License :: OSI Approved :: MIT License',
+  'Programming Language :: Python :: 3 :: Only',
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest==9.0.2",
-    "pytest-github-actions-annotate-failures==0.3.0",
-    "coverage==7.13.1",
-    'mypy==1.19.1; python_version >= "3.9"',
-    'pyyaml>=6,<7',
-    'types-PyYAML',
+  "pytest==9.0.2",
+  "pytest-github-actions-annotate-failures==0.3.0",
+  "coverage==7.13.1",
+  'mypy==1.19.1; python_version >= "3.9"',
+  'pyyaml>=6,<7',
+  'types-PyYAML',
 ]
 
 [project.urls]
@@ -61,34 +61,34 @@ target-version = "py310"
 extend-select = ['UP', 'I']
 
 ignore = [
-    'PLW2901',
-    'PLR0911',
-    'INP001',
-    'N806',
-    'N802',
-    'N803',
-    'E501',
-    'BLE001',
-    'RUF002',
-    'S324',
-    'S301',
-    'S314',
-    'S101',
-    'N815',
-    'S104',
-    'C901',
-    'PLR0913',
-    'RUF001',
-    'SIM108',
-    'TC003',
-    'RUF003',
-    'RET504',
-    'TRY300',
-    'TRY003',
-    'TRY201',
-    'TRY301',
-    'PLR0912',
-    'PLR0915',
-    'PLR2004',
-    'PGH003',
+  'PLW2901',
+  'PLR0911',
+  'INP001',
+  'N806',
+  'N802',
+  'N803',
+  'E501',
+  'BLE001',
+  'RUF002',
+  'S324',
+  'S301',
+  'S314',
+  'S101',
+  'N815',
+  'S104',
+  'C901',
+  'PLR0913',
+  'RUF001',
+  'SIM108',
+  'TC003',
+  'RUF003',
+  'RET504',
+  'TRY300',
+  'TRY003',
+  'TRY201',
+  'TRY301',
+  'PLR0912',
+  'PLR0915',
+  'PLR2004',
+  'PGH003',
 ]

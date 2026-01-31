@@ -1,6 +1,19 @@
 exclude: 'wiki-syntax-spec/.*'
 
 repos:
+  - repo: https://github.com/trim21/pre-commit-mirror-meson
+    rev: 'v1.10.1'
+    hooks:
+      - id: meson-fmt
+        args: ['--inplace', '--editor-config']
+
+  - repo: https://github.com/trim21/dprint-pre-commit
+    rev: 'v0.51.1.0'
+    hooks:
+      - id: dprint
+        pass_filenames: false
+        always_run: true
+
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
     rev: '2025.12.30'
     hooks:
@@ -32,7 +45,7 @@ repos:
     rev: v0.14.10
     hooks:
       - id: ruff
-        args: [ --fix ]
+        args: [--fix]
 
   - repo: https://github.com/psf/black
     rev: 26.1.0
