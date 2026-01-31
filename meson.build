@@ -5,11 +5,13 @@ project(
         'c_std=c11',
         'buildtype=release',
         'debug=false',
+        'python.allow_limited_api=false',
     ],
     meson_version: '>= 1.5.0',
 )
 
-abi = get_option('abi')
+allow_limited_api = get_option('python.allow_limited_api')
+py_limited_api = allow_limited_api ? '3.10' : ''
 
 py = import('python').find_installation(pure: false)
 
@@ -40,7 +42,7 @@ out = py.extension_module(
     subdir: 'bgm_tv_wiki',
     install: true,
     dependencies: py.dependency(),
-    limited_api: abi,
+    limited_api: py_limited_api,
 )
 
 # support for in-tree build

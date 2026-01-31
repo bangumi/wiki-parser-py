@@ -1,6 +1,0 @@
-option(
-  'abi',
-  type: 'string',
-  value: '',
-  description: 'ABI string configuration option',
-)
