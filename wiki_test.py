@@ -62,8 +62,7 @@ def test_bangumi_wiki_invalid(name: str) -> None:
 
 
 def test_cast() -> None:
-    parse(
-        """
+    parse("""
 {{Infobox Crt
 |简体中文名= 绵饴
 |别名={
@@ -82,8 +81,7 @@ def test_cast() -> None:
 |BWH=
 |引用来源= ニコニコ大百科
 }}
-"""
-    )
+""")
 
 
 def test_field_semantically_equal() -> None:
