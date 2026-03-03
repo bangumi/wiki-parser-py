@@ -69,7 +69,7 @@ jobs:
 
       - run: ls ./wheelhouse/
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: 'wheels-${{ runner.os }}-${{ matrix.cibw_arch }}-${{ strategy.job-index }}'
           path: ./wheelhouse/*.whl
@@ -82,7 +82,7 @@ jobs:
 
       - run: pipx run flit build
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: 'wheels-pure-py'
           path: dist/*.whl
