@@ -1,0 +1,114 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    tags-ignore:
+      - '*'
+
+jobs:
+  build:
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}'
+      cancel-in-progress: true
+    uses: ./.github/workflows/_build_wheels.yaml
+
+  cargo-fmt:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt,clippy
+      - run: cargo fmt --check --all
+      - run: cargo clippy
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-24.04', 'macos-15', 'windows-latest']
+        python-version:
+          - '3.10'
+          - '3.11'
+          - '3.12'
+          - '3.13'
+          - '3.14'
+
+    runs-on: '${{ matrix.os }}'
+
+    needs: [build]
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: wheel
+          path: dist
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - run: pip install 'bgm-tv-wiki[dev]' --find-links=./dist/
+
+      - run: pytest
+        env:
+          RUST_BACKTRACE: 'full'
+
+  audit:
+    name: Audit
+    needs: [build]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: wheel
+          path: dist
+
+      - run: pipx run abi3audit --verbose dist/*abi3*.whl
+      - run: pipx run twine check --strict dist/*
+
+  mypy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+          cache: pip
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: true
+
+      - run: uv sync --no-install-project --extra=dev
+
+      - uses: liskin/gh-problem-matcher-wrap@v3
+        with:
+          action: add
+          linters: mypy
+          run: mypy --show-column-numbers --disallow-untyped-defs .
+
+  pre-commit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: trim21/actions/prek@master
+
+  all-ci-jobs:
+    needs: ['test', 'audit', 'cargo-fmt', 'mypy', 'pre-commit']
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 1

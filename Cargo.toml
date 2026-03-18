@@ -1,0 +1,11 @@
+[package]
+name = "bgm-tv-wiki"
+version = "0.0.33"
+edition = "2024"
+
+[lib]
+name = "bgm_tv_wiki"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.28", features = ["abi3-py310"] }

@@ -115,3 +115,6 @@ venv.bak/
 .vscode/
 .idea/
 app.py
+
+# Debug
+*.pdb
