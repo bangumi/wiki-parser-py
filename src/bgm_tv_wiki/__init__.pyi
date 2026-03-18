@@ -22,17 +22,14 @@ __all__ = [
     "ValueInputType",
 ]
 
-
 class Item:
     key: str
     value: str
 
     def __init__(self, *, key: str = "", value: str = "") -> None: ...
 
-
 ValueType: TypeAlias = str | tuple[Item, ...] | None
 ValueInputType: TypeAlias = str | Sequence[Item] | None
-
 
 class Field:
     key: str
@@ -41,7 +38,6 @@ class Field:
     def __init__(self, *, key: str, value: ValueType = None) -> None: ...
     def __lt__(self, other: Field) -> bool: ...
     def semantically_equal(self, other: Field) -> bool: ...
-
 
 class Wiki:
     type: str | None
