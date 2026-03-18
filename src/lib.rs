@@ -607,8 +607,8 @@ impl Wiki {
         }
         let mut a_sorted = self.fields_inner.clone();
         let mut b_sorted = other.fields_inner.clone();
-        a_sorted.sort_by(|a, b| field_sort_key(a).cmp(&field_sort_key(b)));
-        b_sorted.sort_by(|a, b| field_sort_key(a).cmp(&field_sort_key(b)));
+        a_sorted.sort_by_key(field_sort_key);
+        b_sorted.sort_by_key(field_sort_key);
         a_sorted
             .iter()
             .zip(b_sorted.iter())
