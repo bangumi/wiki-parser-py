@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 from collections import OrderedDict
 from collections.abc import Generator, Sequence
-from typing import TypeAlias
+from typing import Iterator, TypeAlias
 
 __all__ = (
     "ArrayNoCloseError",
@@ -73,16 +73,14 @@ class Wiki:
     fields: tuple[Field, ...] = dataclasses.field(default_factory=tuple)
     eol: str = "\n"
 
-    _keys: tuple[str, ...] = ()
+    def has_key(self, key: str) -> bool:
+        for f in self.fields:
+            if f.key == key:
+                return True
+        return False
 
-    def __post_init__(self) -> None:
-        object.__setattr__(self, "_keys", tuple(f.key for f in self.fields))
-
-    def keys(self) -> tuple[str, ...]:
-        return self._keys
-
-    def field_keys(self) -> tuple[str, ...]:
-        return self._keys
+    def field_keys(self) -> Iterator[str]:
+        yield from (f.key for f in self.fields)
 
     def non_zero(self) -> Wiki:
         fields: list[Field] = []
@@ -162,7 +160,7 @@ class Wiki:
         This method doesn't raise IndexError but return length of fields,
         to work with `set_or_insert`
 
-        Do not use this method to check if key exists in fields, ust `key in wiki.keys()` instead
+        Do not use this method to check if key exists in fields, use `wiki.has_key(key)` instead
         """
         for i, f in enumerate(self.fields):
             if f.key == key:
@@ -170,7 +168,10 @@ class Wiki:
         return len(self.fields)
 
     def set_or_insert(
-        self, key: str, value: str | Sequence[Item] | None, index: int
+        self,
+        key: str,
+        value: str | Sequence[Item] | None,
+        index: int,
     ) -> Wiki:
         """If key exists, update current value.
         Overview insert field after give index
@@ -187,7 +188,7 @@ class Wiki:
 
         This will insert field `b` after field `a` if field 'a' exists, or append it to the end.
         """
-        if key in self.keys():
+        if self.has_key(key=key):
             return self.set(key=key, value=value)
 
         if isinstance(value, Sequence) and not isinstance(value, str):
