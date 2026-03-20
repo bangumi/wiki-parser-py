@@ -71,7 +71,7 @@ class Field:
 class Wiki:
     type: str | None = None
     fields: tuple[Field, ...] = dataclasses.field(default_factory=tuple)
-    _eol: str = "\n"
+    eol: str = "\n"
 
     _keys: tuple[str, ...] = ()
 
@@ -103,7 +103,7 @@ class Wiki:
                     fields.append(Field(key=f.key, value=tuple(v)))
                 continue
 
-        return Wiki(type=self.type, fields=tuple(fields), _eol=self._eol)
+        return Wiki(type=self.type, fields=tuple(fields), eol=self.eol)
 
     def get(self, key: str) -> str | tuple[Item, ...] | None:
         for f in self.fields:
@@ -196,7 +196,7 @@ class Wiki:
         fields = list(self.fields)
         fields.insert(index, Field(key=key, value=value))
 
-        return Wiki(type=self.type, fields=tuple(fields), _eol=self._eol)
+        return Wiki(type=self.type, fields=tuple(fields), eol=self.eol)
 
     def set_values(self, values: dict[str, str | tuple[Item, ...] | None]) -> Wiki:
         w = self
@@ -220,11 +220,11 @@ class Wiki:
         if not found:
             fields.append(field)
 
-        return Wiki(type=self.type, fields=tuple(fields), _eol=self._eol)
+        return Wiki(type=self.type, fields=tuple(fields), eol=self.eol)
 
     def remove(self, key: str) -> Wiki:
         fields = tuple(f for f in self.fields if f.key != key)
-        return Wiki(type=self.type, fields=fields, _eol=self._eol)
+        return Wiki(type=self.type, fields=fields, eol=self.eol)
 
     def semantically_equal(self, other: Wiki) -> bool:
         if self.type != other.type:
@@ -269,7 +269,7 @@ class Wiki:
         return Wiki(
             type=self.type,
             fields=tuple(Field(key=key, value=value) for key, value in fields.items()),
-            _eol=self._eol,
+            eol=self.eol,
         )
 
     def __str__(self) -> str:
@@ -389,7 +389,7 @@ def parse(s: str) -> Wiki:
 
     eol_count = s.count("\n")
     if eol_count <= 1:
-        return Wiki(type=wiki_type, _eol=eol)
+        return Wiki(type=wiki_type, eol=eol)
 
     item_container: list[Item] = []
 
@@ -444,7 +444,7 @@ def parse(s: str) -> Wiki:
         # array should be close have read all contents
         raise ArrayNoCloseError(s.count("\n") + line_offset, s.splitlines()[-2])
 
-    return Wiki(type=wiki_type, fields=tuple(fields), _eol=eol)
+    return Wiki(type=wiki_type, fields=tuple(fields), eol=eol)
 
 
 def read_type(s: str) -> str:
@@ -527,7 +527,7 @@ def _process_input(s: str) -> tuple[str, int]:
 
 
 def render(w: Wiki) -> str:
-    return w._eol.join(__render(w))
+    return w.eol.join(__render(w))
 
 
 def __render(w: Wiki) -> Generator[str, None, None]:
