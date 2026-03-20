@@ -85,7 +85,7 @@ class Wiki:
         return self._keys
 
     def non_zero(self) -> Wiki:
-        fields = []
+        fields: list[Field] = []
         for f in self.fields:
             value = f.value
 
@@ -97,7 +97,7 @@ class Wiki:
                     fields.append(f)
                 continue
 
-            if isinstance(value, tuple):
+            if isinstance(value, tuple):  # pyright: ignore[reportUnnecessaryIsInstance]
                 v = [x for x in value if x.key or x.value]
                 if v:
                     fields.append(Field(key=f.key, value=tuple(v)))
@@ -205,7 +205,7 @@ class Wiki:
         return w
 
     def __set(self, field: Field) -> Wiki:
-        fields = []
+        fields: list[Field] = []
         found = False
         for f in self.fields:
             if f.key != field.key:
@@ -397,7 +397,7 @@ def parse(s: str) -> Wiki:
     in_array: bool = False
     current_key: str = ""
 
-    fields = []
+    fields: list[Field] = []
 
     for lino, line in enumerate(s.splitlines()[1:-1]):
         lino += line_offset
