@@ -85,11 +85,15 @@ class Wiki:
         for f in self.fields:
             value = f.value
 
+            if not f.key.strip():
+                if not f.value:
+                    continue
+
             if not value:
                 continue
 
             if isinstance(value, str):
-                if value.strip():
+                if value:
                     fields.append(f)
                 continue
 
