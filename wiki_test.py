@@ -4,14 +4,14 @@ from typing import Any
 import pytest
 import yaml
 
-from bgm_tv_wiki import DuplicatedKeyError, Field, Wiki, WikiSyntaxError, parse
+from bgm_tv_wiki import Field, Wiki, WikiSyntaxError, parse
 from src.bgm_tv_wiki import render
 
 spec_repo_path = Path(__file__, "../wiki-syntax-spec").resolve()
 
 
 def as_dict(w: Wiki) -> dict[str, Any]:
-    data = []
+    data: list[Any] = []
     for f in w.fields:
         if isinstance(f.value, tuple):
             data.append(
@@ -146,53 +146,6 @@ def test_set_at() -> None:
             ]
         )
     )
-
-
-def test_duplicated_keys() -> None:
-    with pytest.raises(DuplicatedKeyError) as e:
-        parse(
-            "\n".join(
-                [
-                    "{{Infobox animanga/Manga",
-                    "|原作= 太田顕喜",
-                    "|作画= むにゅう",
-                    "|作画= むにゅ1",
-                    "}}",
-                ]
-            )
-        ).remove_duplicated_fields()
-
-    assert e.value.keys == ["作画"]
-
-    parse(
-        "\n".join(
-            [
-                "{{Infobox animanga/Manga",
-                "|原作= 太田顕喜",
-                "|作画= むにゅう",
-                "}}",
-            ]
-        )
-    ).remove_duplicated_fields()
-
-    parse(
-        "\n".join(
-            [
-                "{{Infobox Album",
-                "|版本特性= BLドラマCD",
-                "|发售日期= 2016-03-26",
-                "|价格= ￥ 3,240",
-                "|艺术家= 小林裕介 / 佐藤拓也 / 高橋広樹 / 小堀幸 / 大隈健太 / 長野伸二",
-                "|发行商= CROWN WORKS",
-                "|原作= 安西リカ",
-                "|播放时长= 78分11秒",
-                "|录音= デルファイサウンド",
-                "|碟片数量= 1",
-                "|发行商= CROWN WORKS",
-                "}}",
-            ]
-        )
-    ).remove_duplicated_fields()
 
 
 def test_equal() -> None:

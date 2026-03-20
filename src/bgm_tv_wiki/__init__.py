@@ -6,7 +6,6 @@ from typing import TypeAlias
 
 __all__ = (
     "ArrayNoCloseError",
-    "DuplicatedKeyError",
     "ExpectingNewFieldError",
     "ExpectingSignEqualError",
     "Field",
@@ -243,12 +242,6 @@ class Wiki:
 
     def render(self) -> str:
         return render(self)
-
-
-class DuplicatedKeyError(Exception):
-    def __init__(self, keys: list[str]):
-        super().__init__(f"found duplicated keys {repr(sorted(keys))!r}")
-        self.keys = keys
 
 
 class WikiSyntaxError(Exception):
