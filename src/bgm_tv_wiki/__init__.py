@@ -91,7 +91,7 @@ class Wiki:
                 continue
 
             if isinstance(value, str):
-                if value:
+                if value.strip():
                     fields.append(f)
                 continue
 
