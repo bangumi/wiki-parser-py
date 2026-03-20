@@ -239,40 +239,6 @@ class Wiki:
             for a, b in zip(sorted(self.fields), sorted(other.fields), strict=True)
         )
 
-    def remove_duplicated_fields(self) -> Wiki:
-        """Try remove duplicated fields, empty fields will be override"""
-        fields: OrderedDict[str, str | tuple[Item, ...] | None] = OrderedDict()
-        duplicated_keys: list[str] = []
-        for f in self.fields:
-            if f.key in duplicated_keys:
-                continue
-
-            if f.key not in fields:
-                fields[f.key] = f.value
-                continue
-
-            if not f.value:
-                continue
-
-            if not fields[f.key]:
-                fields[f.key] = f.value
-            elif fields[f.key] == f.value:
-                continue
-            else:
-                duplicated_keys.append(f.key)
-
-        if duplicated_keys:
-            raise DuplicatedKeyError(duplicated_keys)
-
-        if len(fields) == len(self.fields):
-            return self
-
-        return Wiki(
-            type=self.type,
-            fields=tuple(Field(key=key, value=value) for key, value in fields.items()),
-            eol=self.eol,
-        )
-
     def __str__(self) -> str:
         return render(self)
 
