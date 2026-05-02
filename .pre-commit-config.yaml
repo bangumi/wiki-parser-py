@@ -2,7 +2,7 @@ exclude: 'wiki-syntax-spec/.*'
 
 repos:
   - repo: https://github.com/trim21/pre-commit-mirror-meson
-    rev: 'v1.10.2'
+    rev: 'v1.11.1'
     hooks:
       - id: meson-fmt
         args: ['--inplace', '--editor-config']
@@ -42,7 +42,7 @@ repos:
       - id: fix-byte-order-marker
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.9
+    rev: v0.15.12
     hooks:
       - id: ruff
         args: [--fix]
