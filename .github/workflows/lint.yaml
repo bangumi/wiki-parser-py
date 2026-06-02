@@ -25,7 +25,7 @@ jobs:
 
       - run: uv sync --no-install-project --extra=dev
 
-      - uses: liskin/gh-problem-matcher-wrap@v3
+      - uses: liskin/gh-problem-matcher-wrap@v4
         with:
           action: add
           linters: mypy
