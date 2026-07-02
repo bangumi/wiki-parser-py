@@ -1,7 +1,7 @@
 [build-system]
 requires = [
   'cython==3.2.5; implementation_name == "cpython"',
-  'meson-python==0.19.0; implementation_name == "cpython"',
+  'meson-python==0.20.0; implementation_name == "cpython"',
   'meson[ninja]==1.11.1; implementation_name == "cpython"',
 ]
 build-backend = 'mesonpy'
