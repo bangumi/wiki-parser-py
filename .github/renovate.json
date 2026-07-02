@@ -7,5 +7,5 @@
     "ci:auto-merge",
     "dependencies"
   ],
-  "prConcurrentLimit": 3
+  "prConcurrentLimit": 1
 }
