@@ -30,8 +30,6 @@ jobs:
 
       - run: pipx run twine check --strict dist/*
 
-      - run: pipx run abi3audit --verbose ./dist/*abi3*
-
   test-cp:
     needs: [build]
     strategy:

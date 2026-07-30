@@ -330,14 +330,14 @@ suffix = "}}"
 
 
 def parse(s: str) -> Wiki:
-    crlf = s.count("\r\n")
-    lf = s.count("\n") - crlf
-    if crlf >= lf:
-        eol = "\r\n"
+    crlf_count = s.count("\r\n")
+    if crlf_count:
+        lf_count = s.count("\n") - crlf_count
+        eol = "\r\n" if crlf_count >= lf_count else "\n"
+        s = s.replace("\r\n", "\n")
     else:
         eol = "\n"
 
-    s = s.replace("\r\n", "\n")
     s, line_offset = _process_input(s)
     if not s:
         return Wiki()
@@ -348,11 +348,13 @@ def parse(s: str) -> Wiki:
     if not s.endswith(suffix):
         raise GlobalSuffixError
 
-    wiki_type = read_type(s)
-
-    eol_count = s.count("\n")
-    if eol_count <= 1:
+    lines = s.splitlines()
+    n = len(lines)
+    if n <= 2:
+        wiki_type = _read_type_from_line(lines[0])
         return Wiki(type=wiki_type, eol=eol)
+
+    wiki_type = _read_type_from_line(lines[0])
 
     item_container: list[Item] = []
 
@@ -362,11 +364,11 @@ def parse(s: str) -> Wiki:
 
     fields: list[Field] = []
 
-    for lino, line in enumerate(s.splitlines()[1:-1]):
+    for lino, line in enumerate(lines[1:-1]):
         lino += line_offset
 
         # now handle line content
-        line = _trim_space(line)
+        line = line.strip()
         if not line:
             continue
 
@@ -405,18 +407,16 @@ def parse(s: str) -> Wiki:
 
     if in_array:
         # array should be close have read all contents
-        raise ArrayNoCloseError(s.count("\n") + line_offset, s.splitlines()[-2])
+        raise ArrayNoCloseError(n - 1 + line_offset, lines[-2])
 
     return Wiki(type=wiki_type, fields=tuple(fields), eol=eol)
 
 
-def read_type(s: str) -> str:
-    try:
-        i = s.index("\n")
-    except ValueError:
-        i = s.index("}")  # {{Infobox Crt}}
-
-    return _trim_space(s[len(prefix) : i])
+def _read_type_from_line(first: str) -> str:
+    """Extract wiki type from the first line. Assumes the line starts with {{Infobox."""
+    if first.endswith(suffix):
+        return first[len(prefix) : -len(suffix)].strip()
+    return first[len(prefix) :].strip()
 
 
 def read_array_item(line: str, lino: int) -> tuple[str, str]:
@@ -429,16 +429,14 @@ def read_array_item(line: str, lino: int) -> tuple[str, str]:
     Raises:
         InvalidArrayItemError: syntax error
     """
-    if line[0] != "[" or line[len(line) - 1] != "]":
+    if line[0] != "[" or line[-1] != "]":
         raise InvalidArrayItemError(lino, line)
 
-    content = line[1 : len(line) - 1]
-
-    try:
-        i = content.index("|")
-        return _trim_space(content[:i]), _trim_space(content[i + 1 :])
-    except ValueError:
-        return "", _trim_space(content)
+    content = line[1:-1]
+    key, sep, value = content.partition("|")
+    if sep:
+        return key.strip(), value.strip()
+    return "", content.strip()
 
 
 def read_start_line(line: str, lino: int) -> tuple[str, str]:
@@ -450,43 +448,21 @@ def read_start_line(line: str, lino: int) -> tuple[str, str]:
     Raises:
         ExpectingSignEqualError: syntax error
     """
-    s = _trim_left_space(line[1:])
-    try:
-        i = s.index("=")
-    except ValueError:
-        raise ExpectingSignEqualError(lino, line) from None
-
-    return s[:i].strip(), s[i + 1 :].strip()
-
-
-_space_str = " \t"
-
-
-def _trim_space(s: str) -> str:
-    return s.strip()
-
-
-def _trim_left_space(s: str) -> str:
-    return s.strip()
-
-
-def _trim_right_space(s: str) -> str:
-    return s.strip()
+    s = line[1:].strip()
+    key, sep, value = s.partition("=")
+    if not sep:
+        raise ExpectingSignEqualError(lino, line)
+    return key.strip(), value.strip()
 
 
 def _process_input(s: str) -> tuple[str, int]:
     offset = 1
-    s = "\n".join(s.splitlines())
-
-    for c in s:
+    for i, c in enumerate(s):
         if c == "\n":
             offset += 1
-        elif c == " " or c == "\t":
-            continue
-        else:
-            return s.strip(), offset
-
-    return s.strip(), offset
+        elif c not in (" ", "\t"):
+            return s[i:].rstrip(), offset
+    return "", offset
 
 
 def render(w: Wiki) -> str:

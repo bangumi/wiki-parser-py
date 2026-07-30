@@ -1,12 +1,6 @@
 exclude: 'wiki-syntax-spec/.*'
 
 repos:
-  - repo: https://github.com/trim21/pre-commit-mirror-meson
-    rev: 'v1.11.1'
-    hooks:
-      - id: meson-fmt
-        args: ['--inplace', '--editor-config']
-
   - repo: https://github.com/trim21/dprint-pre-commit
     rev: 'v0.51.1.0'
     hooks:

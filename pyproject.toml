@@ -1,10 +1,6 @@
 [build-system]
-requires = [
-  'cython==3.2.8; implementation_name == "cpython"',
-  'meson-python==0.20.0; implementation_name == "cpython"',
-  'meson[ninja]==1.11.1; implementation_name == "cpython"',
-]
-build-backend = 'mesonpy'
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [project]
 name = "bgm-tv-wiki"
@@ -22,8 +18,9 @@ classifiers = [
   'Programming Language :: Python :: 3 :: Only',
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
+  "pytest-benchmark>=5.2.3",
   "pytest==9.1.1",
   "pytest-github-actions-annotate-failures==0.4.2",
   "coverage==7.15.0",
@@ -33,12 +30,6 @@ dev = [
 ]
 
 [project.urls]
-
-[tool.cibuildwheel]
-skip = "*musllinux*"
-
-[tool.meson-python]
-limited-api = true
 
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'
