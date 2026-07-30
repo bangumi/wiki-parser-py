@@ -13,13 +13,13 @@ __all__ = (
     "GlobalSuffixError",
     "InvalidArrayItemError",
     "Item",
+    "ValueInputType",
+    "ValueType",
     "Wiki",
     "WikiSyntaxError",
     "parse",
     "render",
     "try_parse",
-    "ValueType",
-    "ValueInputType",
 )
 
 
