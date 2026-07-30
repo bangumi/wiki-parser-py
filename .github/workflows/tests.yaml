@@ -14,24 +14,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    uses: ./.github/workflows/_build_wheels.yaml
-
   twine-check:
     name: Check dist
-    needs: [build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v8.2.0
         with:
-          pattern: wheels-*
-          path: dist
-          merge-multiple: true
-
+          activate-environment: true
+      - run: uv build
       - run: pipx run twine check --strict dist/*
 
   test-cp:
-    needs: [build]
     strategy:
       fail-fast: false
       matrix:
@@ -60,15 +54,7 @@ jobs:
         with:
           activate-environment: true
 
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: wheels-*
-          path: dist
-          merge-multiple: true
-
-      - run: uv sync --no-install-project --group=dev
-
-      - run: uv pip install ./dist/*.whl
+      - run: uv sync --group=dev
 
       - run: uv run pytest
 

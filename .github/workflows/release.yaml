@@ -22,6 +22,7 @@ jobs:
 
       - uses: astral-sh/setup-uv@v9.0.0
 
+      - run: uv build
       - run: uv publish
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
