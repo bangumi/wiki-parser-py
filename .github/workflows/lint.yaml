@@ -23,7 +23,7 @@ jobs:
         with:
           activate-environment: true
 
-      - run: uv sync --no-install-project --extra=dev
+      - run: uv sync --no-install-project --group=dev
 
       - uses: liskin/gh-problem-matcher-wrap@v4
         with:
@@ -36,11 +36,4 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.x'
-          cache: pip
-
-      - run: pip install pre-commit
-
-      - uses: trim21/actions/pre-commit@master
+      - uses: trim21/actions/prek@master

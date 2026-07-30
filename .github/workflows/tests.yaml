@@ -55,7 +55,10 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          activate-environment: true
 
       - uses: actions/download-artifact@v8
         with:
@@ -63,9 +66,11 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - run: pip install 'bgm-tv-wiki[dev]' --find-links=./dist/
+      - run: uv sync --no-install-project --group=dev
 
-      - run: python -m pytest
+      - run: uv pip install ./dist/*.whl
+
+      - run: uv run pytest
 
   test-pass:
     needs:
