@@ -6,11 +6,13 @@ on:
 jobs:
   build:
     name: Build pure Python wheel
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
 
-      - run: pipx run build
+      - uses: astral-sh/setup-uv@v8.2.0
+
+      - run: uv build
 
       - uses: actions/upload-artifact@v7
         with:

@@ -20,7 +20,9 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - run: pipx run twine upload dist/* --disable-progress-bar
+      - uses: astral-sh/setup-uv@v8.2.0
+
+      - run: uv publish
         env:
           TWINE_USERNAME: '__token__'
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
