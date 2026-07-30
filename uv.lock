@@ -49,7 +49,7 @@ wheels = [
 
 [[package]]
 name = "bgm-tv-wiki"
-version = "0.0.42"
+version = "0.0.43"
 source = { editable = "." }
 
 [package.dev-dependencies]
