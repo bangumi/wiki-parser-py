@@ -4,22 +4,65 @@ import dataclasses
 from collections.abc import Generator, Iterator, Sequence
 from typing import TypeAlias
 
+from .ast import (
+    ArrayItemNode,
+    ArrayNoCloseError,
+    ArrayValueNode,
+    EolNode,
+    ExpectingNewFieldError,
+    ExpectingSignEqualError,
+    FieldNode,
+    GlobalPrefixError,
+    GlobalSuffixError,
+    InvalidArrayItemError,
+    LeadingNode,
+    Node,
+    PrefixNode,
+    ScalarValueNode,
+    Span,
+    SuffixNode,
+    TrailingNode,
+    TypeNode,
+    WikiNode,
+    WikiSyntaxError,
+    ast_to_text,
+    parse_ast,
+    unparse,
+)
+
 __all__ = (
+    "ArrayItemNode",
     "ArrayNoCloseError",
+    "ArrayValueNode",
+    "EolNode",
     "ExpectingNewFieldError",
     "ExpectingSignEqualError",
     "Field",
+    "FieldNode",
     "GlobalPrefixError",
     "GlobalSuffixError",
     "InvalidArrayItemError",
     "Item",
+    "LeadingNode",
+    "Node",
+    "PrefixNode",
+    "ScalarValueNode",
+    "Span",
+    "SuffixNode",
+    "TrailingNode",
+    "TypeNode",
     "ValueInputType",
     "ValueType",
     "Wiki",
+    "WikiNode",
     "WikiSyntaxError",
+    "ast_to_text",
+    "ast_to_wiki",
     "parse",
+    "parse_ast",
     "render",
     "try_parse",
+    "unparse",
 )
 
 
@@ -248,74 +291,6 @@ class Wiki:
         return render(self)
 
 
-class WikiSyntaxError(Exception):
-    lino: int | None
-    line: str | None
-    message: str
-
-    def __init__(
-        self, lino: int | None = None, line: str | None = None, message: str = ""
-    ):
-        if lino is not None:
-            super().__init__(f"{lino}: {message}")
-        else:
-            super().__init__(message)
-
-        self.line = line
-        self.lino = lino
-        self.message = message
-
-
-class GlobalPrefixError(WikiSyntaxError):
-    def __init__(self) -> None:
-        super().__init__(message="missing prefix '{{Infobox' at the start")
-
-
-class GlobalSuffixError(WikiSyntaxError):
-    def __init__(self) -> None:
-        super().__init__(message="missing '}}' at the end")
-
-
-class ArrayNoCloseError(WikiSyntaxError):
-    def __init__(
-        self,
-        lino: int | None = None,
-        line: str | None = None,
-        message: str = "array not close",
-    ):
-        super().__init__(lino, line, message)
-
-
-class InvalidArrayItemError(WikiSyntaxError):
-    def __init__(
-        self,
-        lino: int | None = None,
-        line: str | None = None,
-        message: str = "invalid array item",
-    ):
-        super().__init__(lino, line, message)
-
-
-class ExpectingNewFieldError(WikiSyntaxError):
-    def __init__(
-        self,
-        lino: int | None = None,
-        line: str | None = None,
-        message: str = "missing '|' at the beginning of line",
-    ):
-        super().__init__(lino, line, message)
-
-
-class ExpectingSignEqualError(WikiSyntaxError):
-    def __init__(
-        self,
-        lino: int | None = None,
-        line: str | None = None,
-        message: str = "missing '=' in line",
-    ):
-        super().__init__(lino, line, message)
-
-
 def try_parse(s: str) -> Wiki:
     """If failed to parse, return zero value"""
     try:
@@ -325,98 +300,70 @@ def try_parse(s: str) -> Wiki:
     return Wiki()
 
 
-prefix = "{{Infobox"
-suffix = "}}"
-
-
 def parse(s: str) -> Wiki:
+    return ast_to_wiki(parse_ast(s))
+
+
+def ast_to_wiki(node: WikiNode) -> Wiki:
+    if node.type is None:
+        return Wiki(eol=_detect_eol(node.text))
+
+    fields: list[Field] = []
+    for f in node.fields:
+        if f.value is None:
+            fields.append(Field(key=f.key))
+            continue
+
+        if isinstance(f.value, ScalarValueNode):
+            fields.append(Field(key=f.key, value=f.value.value or None))
+            continue
+
+        items = tuple(Item(key=i.name, value=i.value) for i in f.value.items)
+        fields.append(Field(key=f.key, value=items))
+
+    return Wiki(type=node.type, fields=tuple(fields), eol=_detect_eol(node.text))
+
+
+def _detect_eol(s: str) -> str:
     crlf_count = s.count("\r\n")
     if crlf_count:
         lf_count = s.count("\n") - crlf_count
-        eol = "\r\n" if crlf_count >= lf_count else "\n"
-        s = s.replace("\r\n", "\n")
+        return "\r\n" if crlf_count >= lf_count else "\n"
+    return "\n"
+
+
+def render(w: Wiki) -> str:
+    return w.eol.join(__render(w))
+
+
+def __render(w: Wiki) -> Generator[str, None, None]:
+    if w.type:
+        yield "{{Infobox " + w.type
     else:
-        eol = "\n"
+        yield "{{Infobox"
 
-    s, line_offset = _process_input(s)
-    if not s:
-        return Wiki()
+    for field in w.fields:
+        if isinstance(field.value, str):
+            yield f"|{field.key}= {field.value}"
+        elif isinstance(field.value, tuple):
+            yield f"|{field.key}={{"
+            yield from __render_items(field.value)
+            yield "}"
+        elif field.value is None:
+            # default editor will add a space
+            yield f"|{field.key}= "
+        else:
+            raise TypeError("type not support", type(field.value))
 
-    if not s.startswith(prefix):
-        raise GlobalPrefixError
-
-    if not s.endswith(suffix):
-        raise GlobalSuffixError
-
-    lines = s.splitlines()
-    n = len(lines)
-    if n <= 2:
-        wiki_type = _read_type_from_line(lines[0])
-        return Wiki(type=wiki_type, eol=eol)
-
-    wiki_type = _read_type_from_line(lines[0])
-
-    item_container: list[Item] = []
-
-    # loop state
-    in_array: bool = False
-    current_key: str = ""
-
-    fields: list[Field] = []
-
-    for lino, line in enumerate(lines[1:-1]):
-        lino += line_offset
-
-        # now handle line content
-        line = line.strip()
-        if not line:
-            continue
-
-        if line[0] == "|":
-            # new field
-            if in_array:
-                raise ArrayNoCloseError(lino, line)
-
-            current_key = ""
-
-            key, value = read_start_line(line, lino)  # read "key = value"
-
-            if not value:
-                fields.append(Field(key=key))
-                continue
-            if value == "{":
-                in_array = True
-                current_key = key
-                continue
-
-            fields.append(Field(key=key, value=value))
-            continue
-
-        if not in_array:
-            raise ExpectingNewFieldError(lino, line)
-
-        if line == "}":  # close array
-            in_array = False
-            fields.append(Field(key=current_key, value=tuple(item_container)))
-            item_container = []
-            continue
-
-        # array item
-        key, value = read_array_item(line, lino)
-        item_container.append(Item(key=key, value=value))
-
-    if in_array:
-        # array should be close have read all contents
-        raise ArrayNoCloseError(n - 1 + line_offset, lines[-2])
-
-    return Wiki(type=wiki_type, fields=tuple(fields), eol=eol)
+    yield "}}"
 
 
-def _read_type_from_line(first: str) -> str:
-    """Extract wiki type from the first line. Assumes the line starts with {{Infobox."""
-    if first.endswith(suffix):
-        return first[len(prefix) : -len(suffix)].strip()
-    return first[len(prefix) :].strip()
+def __render_items(s: tuple[Item, ...]) -> Generator[str, None, None]:
+    for item in s:
+        if item.key:
+            yield f"[{item.key}|{item.value}]"
+        else:
+            yield f"[{item.value}]"
 
 
 def read_array_item(line: str, lino: int) -> tuple[str, str]:
@@ -453,47 +400,3 @@ def read_start_line(line: str, lino: int) -> tuple[str, str]:
     if not sep:
         raise ExpectingSignEqualError(lino, line)
     return key.strip(), value.strip()
-
-
-def _process_input(s: str) -> tuple[str, int]:
-    offset = 1
-    for i, c in enumerate(s):
-        if c == "\n":
-            offset += 1
-        elif c not in (" ", "\t"):
-            return s[i:].rstrip(), offset
-    return "", offset
-
-
-def render(w: Wiki) -> str:
-    return w.eol.join(__render(w))
-
-
-def __render(w: Wiki) -> Generator[str, None, None]:
-    if w.type:
-        yield "{{Infobox " + w.type
-    else:
-        yield "{{Infobox"
-
-    for field in w.fields:
-        if isinstance(field.value, str):
-            yield f"|{field.key}= {field.value}"
-        elif isinstance(field.value, tuple):
-            yield f"|{field.key}={{"
-            yield from __render_items(field.value)
-            yield "}"
-        elif field.value is None:
-            # default editor will add a space
-            yield f"|{field.key}= "
-        else:
-            raise TypeError("type not support", type(field.value))
-
-    yield "}}"
-
-
-def __render_items(s: tuple[Item, ...]) -> Generator[str, None, None]:
-    for item in s:
-        if item.key:
-            yield f"[{item.key}|{item.value}]"
-        else:
-            yield f"[{item.value}]"
