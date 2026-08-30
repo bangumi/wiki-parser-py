@@ -6,19 +6,11 @@ on:
       - 'v*'
 
 jobs:
-  build:
-    uses: ./.github/workflows/_build_wheels.yaml
-
   pypi:
     name: Upload wheels to PyPI
-    needs: [build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: wheels-*
-          path: dist
-          merge-multiple: true
+      - uses: actions/checkout@v7
 
       - uses: astral-sh/setup-uv@v9.0.0
 
