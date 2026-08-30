@@ -19,7 +19,7 @@ jobs:
           python-version: '3.x'
           cache: pip
 
-      - uses: astral-sh/setup-uv@v9.0.0
+      - uses: astral-sh/setup-uv@v10.0.1
         with:
           activate-environment: true
 
