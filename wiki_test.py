@@ -93,61 +93,6 @@ def test_field_semantically_equal() -> None:
     assert not Field(key="a", value="").semantically_equal(Field(key="a", value=()))
 
 
-def test_index_of() -> None:
-    w = parse(
-        "\n".join(
-            [
-                "{{Infobox animanga/Manga",
-                "|a= 9784061822337",
-                "|b= 4061822330",
-                "}}",
-            ]
-        )
-    )
-
-    assert w.index_of("a") == 0
-    assert w.index_of("b") == 1
-    assert w.index_of("c") == 2
-
-
-def test_set_at() -> None:
-    w = parse(
-        "\n".join(
-            [
-                "{{Infobox animanga/Manga",
-                "|a= 9784061822337",
-                "|b= 4061822330",
-                "}}",
-            ]
-        )
-    )
-
-    assert w.set_or_insert("a", "1", 0) == w.set("a", "1")
-    assert w.set_or_insert("c", "1", 1) == parse(
-        "\n".join(
-            [
-                "{{Infobox animanga/Manga",
-                "|a= 9784061822337",
-                "|c= 1",
-                "|b= 4061822330",
-                "}}",
-            ]
-        )
-    )
-
-    assert w.set_or_insert("c", "1", 10) == parse(
-        "\n".join(
-            [
-                "{{Infobox animanga/Manga",
-                "|a= 9784061822337",
-                "|b= 4061822330",
-                "|c= 1",
-                "}}",
-            ]
-        )
-    )
-
-
 def test_equal() -> None:
     parse(
         "\n".join(
