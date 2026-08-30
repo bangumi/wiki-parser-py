@@ -4,7 +4,7 @@ build-backend = "pdm.backend"
 
 [project]
 name = "bgm-tv-wiki"
-version = "0.1.1"
+version = "0.1.2"
 description = "bgm.tv wiki syntax parser"
 requires-python = ">=3.10.0"
 authors = [

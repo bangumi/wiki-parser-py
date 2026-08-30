@@ -22,4 +22,4 @@ tasks:
       - uv sync
       - git add pyproject.toml uv.lock
       - 'git commit -m "bump: {{.VERSION}}"'
-      - 'git tag "v{{.VERSION}}" -m "v{{.VERSION}}"'
+      - 'git tag "v{{.VERSION}}" -a -m "v{{.VERSION}}"'
