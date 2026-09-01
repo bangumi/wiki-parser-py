@@ -7,7 +7,7 @@ build-backend = 'setuptools.build_meta'
 
 [project]
 name = "bgm-tv-wiki"
-version = "0.2.2"
+version = "0.2.3"
 description = "bgm.tv wiki syntax parser"
 requires-python = ">=3.10.0"
 authors = [
