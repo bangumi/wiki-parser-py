@@ -1,0 +1,66 @@
+name: Reusable workflow example
+
+on:
+  workflow_call:
+
+jobs:
+  build_wheels:
+    name: Build wheels
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-15-intel
+            cibw_arch: arm64
+            cibw_build: 'cp312-* cp314-*'
+
+          - os: macos-15-intel
+            cibw_arch: arm64
+            cibw_build: 'cp313-*'
+
+          - os: windows-latest
+            cibw_arch: AMD64
+            cibw_build: 'cp312-* cp314-*'
+
+          - os: windows-latest
+            cibw_arch: AMD64
+            cibw_build: 'cp313-*'
+
+          - os: ubuntu-latest
+            cibw_arch: x86_64
+            cibw_build: 'cp312-* cp314-*'
+
+          - os: ubuntu-latest
+            cibw_arch: x86_64
+            cibw_build: 'cp313-*'
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pypa/cibuildwheel@v4.1.0
+        env:
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_ARCHS: ${{ matrix.cibw_arch }}
+          CIBW_BUILD: ${{ matrix.cibw_build }}
+
+      - run: ls ./wheelhouse/
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: 'wheels-${{ matrix.os }}-${{ strategy.job-index }}'
+          path: ./wheelhouse/*.whl
+
+  build:
+    name: make pure-py wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.0.1
+
+      - run: uv build
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: 'wheels-pure-py'
+          path: dist/*.whl

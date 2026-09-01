@@ -58,9 +58,44 @@ jobs:
 
       - run: uv run pytest
 
+  test-compiled:
+    name: test compiled (py${{ matrix.python-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - 'ubuntu-24.04'
+        python-version:
+          - '3.12'
+          - '3.13'
+          - '3.14'
+
+    runs-on: '${{ matrix.os }}'
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          activate-environment: true
+
+      - run: uv sync --group=dev
+
+      - run: BGM_TV_WIKI_MYPYC=1 uv pip install .
+
+      - run: uv run pytest
+
   test-pass:
     needs:
       - test-cp
+      - test-compiled
       - twine-check
     runs-on: 'ubuntu-slim'
     steps:
