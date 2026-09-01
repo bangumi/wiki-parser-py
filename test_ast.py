@@ -399,6 +399,33 @@ def test_eol_preserved() -> None:
     )
 
 
+def test_leading_crlf() -> None:
+    raw = "\r\n{{Infobox X\n|a= 1\n}}\n"
+    field = FieldNode(
+        span=Span(start=14, end=19),
+        text="|a= 1",
+        key="a",
+        key_span=Span(start=15, end=16),
+        value=ScalarValueNode(span=Span(start=18, end=19), text="1", value="1"),
+    )
+    assert parse_ast(raw) == WikiNode(
+        span=Span(start=0, end=23),
+        text=raw,
+        type="X",
+        children=(
+            LeadingNode(span=Span(start=0, end=2), text="\r\n"),
+            PrefixNode(span=Span(start=2, end=11), text="{{Infobox"),
+            TypeNode(span=Span(start=11, end=13), text=" X", name="X"),
+            EolNode(span=Span(start=13, end=14), text="\n"),
+            field,
+            EolNode(span=Span(start=19, end=20), text="\n"),
+            SuffixNode(span=Span(start=20, end=22), text="}}"),
+            EolNode(span=Span(start=22, end=23), text="\n"),
+        ),
+        fields=(field,),
+    )
+
+
 def test_children_contiguous() -> None:
     raws = [
         "{{Infobox X\n|a= 1\n}}\n",
@@ -521,6 +548,7 @@ def test_repr_is_dataclass_format() -> None:
     ("raw", "error"),
     [
         ("hello", GlobalPrefixError),
+        ("\r{{Infobox X\n}}", GlobalPrefixError),
         ("{{Infobox X", GlobalSuffixError),
         ("{{Infobox\nhello\n}}", ExpectingNewFieldError),
         ("{{Infobox\n|a\n}}", ExpectingSignEqualError),

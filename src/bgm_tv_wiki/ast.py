@@ -228,6 +228,9 @@ def parse_ast(s: str) -> WikiNode:
         if c == "\n":
             line_offset += 1
             start += 1
+        elif c == "\r" and start + 1 < len(s) and s[start + 1] == "\n":
+            line_offset += 1
+            start += 2
         elif c in " \t":
             start += 1
         else:
