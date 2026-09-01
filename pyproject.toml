@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-  'setuptools>=68',
-  'mypy>=2.0.0',
+  'setuptools==84.0.0',
+  'mypy==2.3.1',
 ]
 build-backend = 'setuptools.build_meta'
 
