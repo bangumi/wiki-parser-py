@@ -6,15 +6,21 @@ on:
       - 'v*'
 
 jobs:
+  build:
+    uses: ./.github/workflows/_build_wheels.yaml
+
   pypi:
     name: Upload wheels to PyPI
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
 
-      - uses: astral-sh/setup-uv@v10.0.1
-
-      - run: uv build
-      - run: uv publish
+      - run: pipx run twine upload dist/* --disable-progress-bar
         env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          TWINE_USERNAME: '__token__'
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}

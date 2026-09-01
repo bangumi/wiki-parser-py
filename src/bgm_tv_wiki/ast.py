@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import dataclasses
+import typing
 
 prefix = "{{Infobox"
 suffix = "}}"
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
-class Span:
+class Span(typing.NamedTuple):
     start: int
     end: int
 
@@ -292,14 +292,14 @@ def parse_ast(s: str) -> WikiNode:
             line_text, line_start, line_end, line_eol = lines[idx]
             lino = line_offset + idx
 
-            stripped_line = line_text.strip()
+            lstripped = line_text.lstrip()
+            lstrip_len = len(line_text) - len(lstripped)
+            stripped_line = lstripped.rstrip()
             if not stripped_line:
                 if line_eol is not None:
                     eol_node = _eol(s, line_end, line_eol)
                     (array_children if in_array else children).append(eol_node)
                 continue
-
-            lstrip_len = len(line_text) - len(line_text.lstrip())
 
             if stripped_line[0] == "|":
                 if in_array:
@@ -311,7 +311,7 @@ def parse_ast(s: str) -> WikiNode:
 
                 key_raw = line_text[lstrip_len + 1 : eq]
                 key = key_raw.strip()
-                key_span = _trim_span(key_raw, line_start + lstrip_len + 1)
+                key_span = _trimmed_span(key_raw, key, line_start + lstrip_len + 1)
 
                 value_raw = line_text[eq + 1 : line_end]
                 value = value_raw.strip()
@@ -320,7 +320,9 @@ def parse_ast(s: str) -> WikiNode:
                     in_array = True
                     array_key = key
                     array_key_span = key_span
-                    array_value_start = _trim_span(value_raw, line_start + eq + 1).start
+                    array_value_start = _trimmed_span(
+                        value_raw, value, line_start + eq + 1
+                    ).start
                     array_field_start = line_start
                     array_items = []
                     array_children = []
@@ -334,7 +336,7 @@ def parse_ast(s: str) -> WikiNode:
                     key=key,
                     key_span=key_span,
                     value=ScalarValueNode(
-                        span=_trim_span(value_raw, line_start + eq + 1),
+                        span=_trimmed_span(value_raw, value, line_start + eq + 1),
                         text=value,
                         value=value,
                     ),
@@ -428,11 +430,10 @@ def parse_ast(s: str) -> WikiNode:
     )
 
 
-def _trim_span(text: str, base: int) -> Span:
-    stripped = text.strip()
+def _trimmed_span(raw: str, stripped: str, base: int) -> Span:
     if not stripped:
         return Span(start=base, end=base)
-    start = base + text.find(stripped)
+    start = base + len(raw) - len(raw.lstrip())
     return Span(start=start, end=start + len(stripped))
 
 
