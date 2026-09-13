@@ -1,18 +1,19 @@
+# cython: freethreading_compatible=True
 from __future__ import annotations
 
 import dataclasses
-import typing
 
 prefix = "{{Infobox"
 suffix = "}}"
 
 
-class Span(typing.NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class Span:
     start: int
     end: int
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class Node:
     span: Span
     text: str
@@ -53,65 +54,65 @@ class Node:
         return parts
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class WikiNode(Node):
     """Root node, text holds the whole input."""
 
-    children: tuple[Node, ...] = ()
-    type: str | None = None
-    fields: tuple[FieldNode, ...] = ()
+    children: tuple[Node, ...]
+    type: str | None
+    fields: tuple[FieldNode, ...]
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class PrefixNode(Node):
     """The ``{{Infobox`` prefix."""
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class TypeNode(Node):
-    name: str = ""
+    name: str
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class EolNode(Node):
     """A single newline, ``text`` keeps the original form (``\\n`` or ``\\r\\n``)."""
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class FieldNode(Node):
-    key: str = ""
-    key_span: Span = dataclasses.field(default_factory=lambda: Span(start=0, end=0))
-    value: ScalarValueNode | ArrayValueNode | None = None
+    key: str
+    key_span: Span
+    value: ScalarValueNode | ArrayValueNode | None
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class ScalarValueNode(Node):
-    value: str = ""
+    value: str
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class ArrayValueNode(Node):
-    children: tuple[Node, ...] = ()
-    items: tuple[ArrayItemNode, ...] = ()
+    children: tuple[Node, ...]
+    items: tuple[ArrayItemNode, ...]
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class ArrayItemNode(Node):
-    name: str = ""
-    value: str = ""
+    name: str
+    value: str
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class SuffixNode(Node):
     """The trailing ``}}``."""
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class LeadingNode(Node):
     """Whitespace before the prefix."""
 
 
-@dataclasses.dataclass(frozen=True, slots=True, kw_only=True)
+@dataclasses.dataclass(frozen=True)
 class TrailingNode(Node):
     """Whitespace after the suffix line's eol."""
 
@@ -237,7 +238,7 @@ def parse_ast(s: str) -> WikiNode:
             break
 
     if start == len(s):
-        return WikiNode(span=Span(start=0, end=len(s)), text=s)
+        return WikiNode(Span(0, len(s)), s, (), None, ())
 
     if not s.startswith(prefix, start):
         raise GlobalPrefixError
@@ -251,8 +252,7 @@ def parse_ast(s: str) -> WikiNode:
     n = len(lines)
     first_text, first_start, first_end, first_eol = lines[0]
 
-    prefix_span = Span(start=first_start, end=first_start + len(prefix))
-    prefix_node = PrefixNode(span=prefix_span, text=prefix)
+    prefix_node = PrefixNode(Span(first_start, first_start + len(prefix)), prefix)
 
     if first_text.endswith(suffix):
         type_raw = first_text[len(prefix) : -len(suffix)]
@@ -260,29 +260,25 @@ def parse_ast(s: str) -> WikiNode:
         type_raw = first_text[len(prefix) :]
     type_name = type_raw.strip()
     type_node = TypeNode(
-        span=Span(
-            start=first_start + len(prefix),
-            end=first_start + len(prefix) + len(type_raw),
-        ),
-        text=type_raw,
-        name=type_name,
+        Span(first_start + len(prefix), first_start + len(prefix) + len(type_raw)),
+        type_raw,
+        type_name,
     )
 
     children: list[Node] = [prefix_node, type_node]
     fields: list[FieldNode] = []
 
     if n == 1:
-        suffix_node = SuffixNode(
-            span=Span(start=first_end - 2, end=first_end), text=suffix
-        )
-        children.append(suffix_node)
+        children.append(SuffixNode(Span(first_end - 2, first_end), suffix))
     else:
         if first_eol is not None:
-            children.append(_eol(s, first_end, first_eol))
+            children.append(
+                EolNode(Span(first_end, first_end + len(first_eol)), first_eol)
+            )
 
         in_array = False
         array_key = ""
-        array_key_span = Span(start=0, end=0)
+        array_key_span = Span(0, 0)
         array_value_start = 0
         array_field_start = 0
         array_items: list[ArrayItemNode] = []
@@ -297,7 +293,9 @@ def parse_ast(s: str) -> WikiNode:
             stripped_line = lstripped.rstrip()
             if not stripped_line:
                 if line_eol is not None:
-                    eol_node = _eol(s, line_end, line_eol)
+                    eol_node = EolNode(
+                        Span(line_end, line_end + len(line_eol)), line_eol
+                    )
                     (array_children if in_array else children).append(eol_node)
                 continue
 
@@ -310,41 +308,55 @@ def parse_ast(s: str) -> WikiNode:
                     raise ExpectingSignEqualError(lino, stripped_line)
 
                 key_raw = line_text[lstrip_len + 1 : eq]
-                key = key_raw.strip()
-                key_span = _trimmed_span(key_raw, key, line_start + lstrip_len + 1)
+                key_lstripped = key_raw.lstrip()
+                key = key_lstripped.rstrip()
+                key_base = line_start + lstrip_len + 1
+                key_start = (
+                    key_base
+                    if not key
+                    else key_base + len(key_raw) - len(key_lstripped)
+                )
+                key_span = Span(key_start, key_start + len(key))
 
                 value_raw = line_text[eq + 1 : line_end]
-                value = value_raw.strip()
+                value_lstripped = value_raw.lstrip()
+                value = value_lstripped.rstrip()
+                value_base = line_start + eq + 1
+                value_start = (
+                    value_base
+                    if not value
+                    else value_base + len(value_raw) - len(value_lstripped)
+                )
 
                 if value == "{":
                     in_array = True
                     array_key = key
                     array_key_span = key_span
-                    array_value_start = _trimmed_span(
-                        value_raw, value, line_start + eq + 1
-                    ).start
+                    array_value_start = value_start
                     array_field_start = line_start
                     array_items = []
                     array_children = []
                     if line_eol is not None:
-                        array_children.append(_eol(s, line_end, line_eol))
+                        array_children.append(
+                            EolNode(Span(line_end, line_end + len(line_eol)), line_eol)
+                        )
                     continue
 
                 field_node = FieldNode(
-                    span=Span(start=line_start, end=line_end),
-                    text=line_text,
-                    key=key,
-                    key_span=key_span,
-                    value=ScalarValueNode(
-                        span=_trimmed_span(value_raw, value, line_start + eq + 1),
-                        text=value,
-                        value=value,
+                    Span(line_start, line_end),
+                    line_text,
+                    key,
+                    key_span,
+                    ScalarValueNode(
+                        Span(value_start, value_start + len(value)), value, value
                     ),
                 )
                 fields.append(field_node)
                 children.append(field_node)
                 if line_eol is not None:
-                    children.append(_eol(s, line_end, line_eol))
+                    children.append(
+                        EolNode(Span(line_end, line_end + len(line_eol)), line_eol)
+                    )
                 continue
 
             if not in_array:
@@ -354,22 +366,24 @@ def parse_ast(s: str) -> WikiNode:
                 in_array = False
                 rbrace_start = line_start + lstrip_len
                 value_node = ArrayValueNode(
-                    span=Span(start=array_value_start, end=rbrace_start + 1),
-                    text=s[array_value_start : rbrace_start + 1],
-                    children=tuple(array_children),
-                    items=tuple(array_items),
+                    Span(array_value_start, rbrace_start + 1),
+                    s[array_value_start : rbrace_start + 1],
+                    tuple(array_children),
+                    tuple(array_items),
                 )
                 field_node = FieldNode(
-                    span=Span(start=array_field_start, end=line_end),
-                    text=s[array_field_start:line_end],
-                    key=array_key,
-                    key_span=array_key_span,
-                    value=value_node,
+                    Span(array_field_start, line_end),
+                    s[array_field_start:line_end],
+                    array_key,
+                    array_key_span,
+                    value_node,
                 )
                 fields.append(field_node)
                 children.append(field_node)
                 if line_eol is not None:
-                    children.append(_eol(s, line_end, line_eol))
+                    children.append(
+                        EolNode(Span(line_end, line_end + len(line_eol)), line_eol)
+                    )
                 continue
 
             if stripped_line[0] != "[" or stripped_line[-1] != "]":
@@ -385,60 +399,38 @@ def parse_ast(s: str) -> WikiNode:
                 item_value = inner.strip()
 
             item_node = ArrayItemNode(
-                span=Span(start=line_start, end=line_end),
-                text=line_text,
-                name=name,
-                value=item_value,
+                Span(line_start, line_end), line_text, name, item_value
             )
             array_items.append(item_node)
             array_children.append(item_node)
             if line_eol is not None:
-                array_children.append(_eol(s, line_end, line_eol))
+                array_children.append(
+                    EolNode(Span(line_end, line_end + len(line_eol)), line_eol)
+                )
 
         if in_array:
             raise ArrayNoCloseError(n - 1 + line_offset, lines[-2][0])
 
         suffix_line_text, suffix_line_start, suffix_line_end, _ = lines[-1]
-        suffix_node = SuffixNode(
-            span=Span(start=suffix_line_start, end=suffix_line_end),
-            text=suffix_line_text,
+        children.append(
+            SuffixNode(Span(suffix_line_start, suffix_line_end), suffix_line_text)
         )
-        children.append(suffix_node)
 
     after = stripped_end
     if s.startswith("\r\n", after):
-        children.append(_eol(s, after, "\r\n"))
+        children.append(EolNode(Span(after, after + 2), "\r\n"))
         after += 2
     elif after < len(s) and s[after] == "\n":
-        children.append(_eol(s, after, "\n"))
+        children.append(EolNode(Span(after, after + 1), "\n"))
         after += 1
 
     if after < len(s):
-        children.append(
-            TrailingNode(span=Span(start=after, end=len(s)), text=s[after:])
-        )
+        children.append(TrailingNode(Span(after, len(s)), s[after:]))
 
     if start > 0:
-        children.insert(0, LeadingNode(span=Span(start=0, end=start), text=s[:start]))
+        children.insert(0, LeadingNode(Span(0, start), s[:start]))
 
-    return WikiNode(
-        span=Span(start=0, end=len(s)),
-        text=s,
-        children=tuple(children),
-        type=type_name,
-        fields=tuple(fields),
-    )
-
-
-def _trimmed_span(raw: str, stripped: str, base: int) -> Span:
-    if not stripped:
-        return Span(start=base, end=base)
-    start = base + len(raw) - len(raw.lstrip())
-    return Span(start=start, end=start + len(stripped))
-
-
-def _eol(s: str, offset: int, text: str) -> EolNode:
-    return EolNode(span=Span(start=offset, end=offset + len(text)), text=text)
+    return WikiNode(Span(0, len(s)), s, tuple(children), type_name, tuple(fields))
 
 
 def _split_lines(
