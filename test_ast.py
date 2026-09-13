@@ -518,12 +518,6 @@ def test_ast_to_text_keeps_eol() -> None:
     assert ast_to_text(w) == "{{Infobox X\r\n|a= 1\r\n}}\r\n"
 
 
-def test_eol_detection() -> None:
-    assert parse("{{Infobox X\r\n|a= 1\r\n}}\r\n").eol == "\r\n"
-    assert parse("{{Infobox X\n|a= 1\n}}\n").eol == "\n"
-    assert parse("{{Infobox X\n|a= 1\r\n}}\r\n").eol == "\r\n"
-
-
 def test_str_tree() -> None:
     w = parse_ast("{{Infobox X\n|a= 1\n}}\n")
     s = str(w)

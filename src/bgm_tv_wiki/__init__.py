@@ -112,7 +112,6 @@ class Field:
 class Wiki:
     type: str | None = None
     fields: tuple[Field, ...] = dataclasses.field(default_factory=tuple)
-    eol: str = "\n"
 
     def has_key(self, key: str) -> bool:
         for f in self.fields:
@@ -146,7 +145,7 @@ class Wiki:
                     fields.append(Field(key=f.key, value=tuple(v)))
                 continue
 
-        return Wiki(type=self.type, fields=tuple(fields), eol=self.eol)
+        return Wiki(type=self.type, fields=tuple(fields))
 
     def get(self, key: str) -> str | tuple[Item, ...] | None:
         for f in self.fields:
@@ -226,7 +225,7 @@ def parse(s: str) -> Wiki:
 
 def ast_to_wiki(node: WikiNode) -> Wiki:
     if node.type is None:
-        return Wiki(eol=_detect_eol(node.text))
+        return Wiki()
 
     fields: list[Field] = []
     for f in node.fields:
@@ -241,19 +240,11 @@ def ast_to_wiki(node: WikiNode) -> Wiki:
         items = tuple(Item(key=i.name, value=i.value) for i in f.value.items)
         fields.append(Field(key=f.key, value=items))
 
-    return Wiki(type=node.type, fields=tuple(fields), eol=_detect_eol(node.text))
+    return Wiki(type=node.type, fields=tuple(fields))
 
 
-def _detect_eol(s: str) -> str:
-    crlf_count = s.count("\r\n")
-    if crlf_count:
-        lf_count = s.count("\n") - crlf_count
-        return "\r\n" if crlf_count >= lf_count else "\n"
-    return "\n"
-
-
-def render(w: Wiki) -> str:
-    return w.eol.join(__render(w))
+def render(w: Wiki, eol: str = "\n") -> str:
+    return eol.join(__render(w))
 
 
 def __render(w: Wiki) -> Generator[str, None, None]:
