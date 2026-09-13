@@ -1,9 +1,10 @@
 [build-system]
 requires = [
-  'setuptools==84.0.0',
-  'mypy==2.3.1',
+  'cython==3.2.9',
+  'meson[ninja]==1.11.2',
+  'pdm-backend==2.4.7',
 ]
-build-backend = 'setuptools.build_meta'
+build-backend = 'pdm.backend'
 
 [project]
 name = "bgm-tv-wiki"
@@ -37,21 +38,16 @@ dev = [
 [tool.pytest.ini_options]
 addopts = '-rav -Werror'
 
-[tool.setuptools]
-package-dir = { "" = "src" }
-
-[tool.setuptools.packages.find]
-where = ['src']
-
-[tool.setuptools.package-data]
-bgm_tv_wiki = ['py.typed']
+[tool.pdm.build]
+custom-hook = 'pdm_build.py'
+source-includes = ['meson.build']
 
 [tool.cibuildwheel]
 build = 'cp312-* cp313-* cp314-* cp314t-*'
 skip = '*musllinux*'
 
 [tool.cibuildwheel.environment]
-BGM_TV_WIKI_MYPYC = '1'
+BGM_TV_WIKI_NATIVE = '1'
 
 [tool.mypy]
 python_version = "3.10"

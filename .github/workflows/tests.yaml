@@ -89,7 +89,7 @@ jobs:
 
       - run: uv sync --group=dev
 
-      - run: BGM_TV_WIKI_MYPYC=1 uv pip install .
+      - run: BGM_TV_WIKI_NATIVE=1 uv pip install .
 
       - run: uv run pytest
 

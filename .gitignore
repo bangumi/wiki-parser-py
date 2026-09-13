@@ -16,6 +16,7 @@ __pycache__/
 docs/source/_build/
 docs/build/
 build/
+.pdm-build/
 develop-eggs/
 dist/
 downloads/
