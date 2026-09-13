@@ -47,7 +47,7 @@ where = ['src']
 bgm_tv_wiki = ['py.typed']
 
 [tool.cibuildwheel]
-build = 'cp312-* cp313-* cp314-*'
+build = 'cp312-* cp313-* cp314-* cp314t-*'
 skip = '*musllinux*'
 
 [tool.cibuildwheel.environment]
